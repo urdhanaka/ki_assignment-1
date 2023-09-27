@@ -1,9 +1,12 @@
 package entity
 
-type Files struct {
-	ID    uint64 `json:"id" gorm:"primaryKey"`
-	Files []byte `json:"files" binding:"required"`
+import (
+	"gorm.io/gorm"
+)
 
-	UserID uint64 `gorm:"foreignKey" json:"user_id"`
-	User   *User  `gorm:"constraint:OnUpdate:CASCADE:OnDelete:CASCADE;" json:"user,omitempty"`
+type Files struct {
+	gorm.Model
+	Files []byte `json:"files" binding:"required"`
+	// user has many files
+	UserID uint64 `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" binding:"required" json:"user_id"`
 }
