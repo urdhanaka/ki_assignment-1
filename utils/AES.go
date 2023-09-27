@@ -2,20 +2,23 @@ package utils
 
 import (
 	"crypto/aes"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
-const key = "vzhLV1DZPKR9ttZa2NBQN1DD1Y7W9NXk"
-
-func Encrypt(String string) (string, error) {
-	c, err := aes.NewCipher([]byte(key))
-
-	return string(bytes), err
+func EncryptAES(key []byte, data []byte) ([]byte, error) {
+	c, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	dst := make([]byte, len(data))
+	c.Encrypt(dst, data)
+	return dst, nil
 }
 
-func Decrypt(String string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(String), 4)
-
-	return string(bytes), err
+func DecryptAES(dst []byte, key []byte, data []byte) error {
+	c, err := aes.NewCipher(key)
+	if err != nil {
+		return err
+	}
+	c.Decrypt(dst, data)
+	return nil
 }
