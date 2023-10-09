@@ -26,11 +26,6 @@ func (User) TableName() string {
 	return "users"
 }
 
-func (u *User) EncryptUsername(username string) string {
-	enc, _ := utils.EncryptAES([]byte(username), []byte(u.Username_AES))
-	return string(enc)
-}
-
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	if enc, err := utils.EncryptAES([]byte(u.Username_AES), []byte(utils.GetEnv("KEY"))); err == nil {
 		u.Username_AES = string(enc)
