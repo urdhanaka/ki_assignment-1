@@ -13,6 +13,7 @@ type UserConnection struct {
 
 type UserRepository interface {
 	RegisterUser(ctx context.Context, user entity.User) (entity.User, error)
+	GetAllUser(ctx context.Context) ([]entity.User, error)
 	GetUserByID(ctx context.Context, userID uint64) (entity.User, error)
 	UpdateUser(ctx context.Context, user entity.User) (entity.User, error)
 	DeleteUser(ctx context.Context, userID uint64) (error)
@@ -30,6 +31,16 @@ func (db *UserConnection) RegisterUser(ctx context.Context, user entity.User) (e
 	}
 
 	return user, nil
+}
+
+func (db *UserConnection) GetAllUser(ctx context.Context) ([]entity.User, error) {
+	var users []entity.User
+
+	if err := db.connection.Find(&users).Error; err != nil {
+		return []entity.User{}, err
+	}
+
+	return users, nil
 }
 
 func (db *UserConnection) GetUserByID(ctx context.Context, userID uint64) (entity.User, error) {

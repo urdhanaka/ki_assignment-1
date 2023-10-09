@@ -10,6 +10,7 @@ import (
 
 type UserController interface {
 	RegisterUser(c *gin.Context)
+	GetAllUser(c *gin.Context)
 	// GetUserByID(c *gin.Context)
 	// UpdateUser(c *gin.Context)
 	// DeleteUser(c *gin.Context)
@@ -26,18 +27,28 @@ func NewUserController(userService service.UserService) UserController {
 }
 
 func (u *userController) RegisterUser(c *gin.Context) {
-	var userDto dto.UserCreateDto
+	var userDTO dto.UserCreateDto
 
-	if err := c.ShouldBindJSON(&userDto); err != nil {
+	if err := c.ShouldBindJSON(&userDTO); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	user, err := u.UserService.RegisterUser(c, userDto)
+	user, err := u.UserService.RegisterUser(c, userDTO)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, user)
+	c.JSON(http.StatusOK, user)
+}
+
+func (u *userController) GetAllUser(c *gin.Context) {
+	users, err := u.UserService.GetAllUser(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
 }
