@@ -1,24 +1,58 @@
 package utils
 
 import (
+	"bytes"
 	"crypto/aes"
+	"crypto/cipher"
+	"encoding/hex"
 )
 
-func EncryptAES(key []byte, data []byte) ([]byte, error) {
-	c, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
-	}
-	dst := make([]byte, len(data))
-	c.Encrypt(dst, data)
-	return dst, nil
+func PKCS5Padding(ciphertext []byte, blockSize int, after int) []byte {
+	padding := (blockSize - len(ciphertext)%blockSize)
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+
+	return append(ciphertext, padtext...)
 }
 
-func DecryptAES(dst []byte, key []byte, data []byte) error {
-	c, err := aes.NewCipher(key)
+func EncryptAES(plaintext string) (string, error) {
+	// Retrieve the key and iv
+	key := []byte(GetEnv("KEY"))
+	iv := []byte(GetEnv("IV"))
+
+	// Use padding function
+	bPlaintext := PKCS5Padding([]byte(plaintext), aes.BlockSize, len(plaintext))
+
+	// Make new cipher key
+	block, err := aes.NewCipher(key)
 	if err != nil {
-		return err
+		return "", err
 	}
-	c.Decrypt(dst, data)
-	return nil
+
+	// Make a variable to hold the ciphertext
+	ciphertext := make([]byte, len(bPlaintext))
+	mode := cipher.NewCBCEncrypter(block, iv)
+	mode.CryptBlocks(ciphertext, bPlaintext)
+
+	return hex.EncodeToString(ciphertext), nil
+}
+
+func DecryptAES(ciphertext string) (string, error) {
+	// Retrieve the key and iv
+	key := []byte(GetEnv("KEY"))
+	iv := []byte(GetEnv("IV"))
+
+	ciphertextDecoded, err := hex.DecodeString(ciphertext)
+	if err != nil {
+		return "", err
+	}
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	mode := cipher.NewCBCDecrypter(block, iv)
+	mode.CryptBlocks([]byte(ciphertextDecoded), []byte(ciphertextDecoded))
+
+	return string(ciphertextDecoded), nil
 }

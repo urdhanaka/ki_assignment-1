@@ -9,12 +9,12 @@ import (
 
 type User struct {
 	ID           uuid.UUID `gorm:"primary_key;not_null;type:char(36)" json:"id"`
-	Username_AES string  `json:"username_aes" binding:"required"`
-	Username_RC4 string  `json:"username_rc4" binding:"required"`
-	Username_DEC string  `json:"username_dec" binding:"required"`
-	Password_AES string  `json:"password_aes" binding:"required"`
-	Password_RC4 string  `json:"password_rc4" binding:"required"`
-	Password_DEC string  `json:"password_dec" binding:"required"`
+	Username_AES string    `json:"username_aes" binding:"required"`
+	Username_RC4 string    `json:"username_rc4" binding:"required"`
+	Username_DEC string    `json:"username_dec" binding:"required"`
+	Password_AES string    `json:"password_aes" binding:"required"`
+	Password_RC4 string    `json:"password_rc4" binding:"required"`
+	Password_DEC string    `json:"password_dec" binding:"required"`
 
 	// user has many files
 	Files []Files `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" binding:"required" json:"files"`
@@ -27,7 +27,7 @@ func (User) TableName() string {
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
-	if enc, err := utils.EncryptAES([]byte(u.Username_AES), []byte(utils.GetEnv("KEY"))); err == nil {
+	if enc, err := utils.EncryptAES(u.Username_AES); err == nil {
 		u.Username_AES = string(enc)
 	}
 
@@ -39,7 +39,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.Username_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptAES([]byte(u.Password_AES), []byte(utils.GetEnv("KEY"))); err == nil {
+	if enc, err := utils.EncryptAES(u.Password_AES); err == nil {
 		u.Password_AES = string(enc)
 	}
 
