@@ -27,10 +27,12 @@ func (User) TableName() string {
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
+	// Done
 	if enc, err := utils.EncryptAES(u.Username_AES); err == nil {
 		u.Username_AES = string(enc)
 	}
 
+	// Done
 	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4), []byte(utils.GetEnv("KEY"))); err == nil {
 		u.Username_RC4 = string(enc)
 	}
@@ -39,10 +41,12 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.Username_DEC = string(enc)
 	}
 
+	// Done
 	if enc, err := utils.EncryptAES(u.Password_AES); err == nil {
 		u.Password_AES = string(enc)
 	}
 
+	// Done
 	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4), []byte(utils.GetEnv("KEY"))); err == nil {
 		u.Password_RC4 = string(enc)
 	}
