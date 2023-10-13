@@ -7,6 +7,7 @@ import (
 	"ki_assignment-1/routes"
 	"ki_assignment-1/service"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
@@ -17,7 +18,6 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-
 
 	var (
 		db *gorm.DB = config.SetupDatabaseConnection()
@@ -30,6 +30,8 @@ func main() {
 	)
 
 	router := gin.Default()
+
+	router.Use(cors.Default())
 
 	routes.UserRoutes(router, userController)
 
