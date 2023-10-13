@@ -23,10 +23,13 @@ func main() {
 		db *gorm.DB = config.SetupDatabaseConnection()
 
 		userRepository repository.UserRepository = repository.NewUserRepository(db)
+		fileRepository repository.FileRepository = repository.NewFileRepository(db)
 
 		userService service.UserService = service.NewUserService(userRepository)
+		fileService service.FileService = service.NewFileService(fileRepository)
 
 		userController controllers.UserController = controllers.NewUserController(userService)
+		fileController controllers.FileController = controllers.NewFileController(fileService)
 	)
 
 	router := gin.Default()
@@ -34,6 +37,7 @@ func main() {
 	router.Use(cors.Default())
 
 	routes.UserRoutes(router, userController)
+	routes.FileRoutes(router, fileController)
 
 	router.Run()
 }
