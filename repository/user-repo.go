@@ -17,6 +17,8 @@ type UserRepository interface {
 	GetUserByID(ctx context.Context, userID uint64) (entity.User, error)
 	UpdateUser(ctx context.Context, user entity.User) (entity.User, error)
 	DeleteUser(ctx context.Context, userID uint64) (error)
+
+	CalculateAESAlgorithmTime(start int64, end int64) uint64
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -67,4 +69,9 @@ func (db *UserConnection) DeleteUser(ctx context.Context, userID uint64) (error)
 	}
 
 	return nil
+}
+
+func (db *UserConnection) CalculateAESAlgorithmTime(start int64, end int64) uint64 {
+	var timeElapsed uint64 = uint64(end - start)
+	return timeElapsed
 }
