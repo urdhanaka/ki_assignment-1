@@ -7,11 +7,18 @@ import (
 	"encoding/hex"
 )
 
-func PKCS5Padding(ciphertext []byte, blockSize int, after int) []byte {
+func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
 	padding := (blockSize - len(ciphertext)%blockSize)
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 
 	return append(ciphertext, padtext...)
+}
+
+func PKCS5Unpadding(src []byte) []byte {
+	length := len(src)
+	unpadding := int(src[length-1])
+
+	return src[:(length - unpadding)]
 }
 
 func EncryptAES(plaintext string) (string, error) {
@@ -20,7 +27,7 @@ func EncryptAES(plaintext string) (string, error) {
 	iv := []byte(GetEnv("IV"))
 
 	// Use padding function
-	bPlaintext := PKCS5Padding([]byte(plaintext), aes.BlockSize, len(plaintext))
+	bPlaintext := PKCS5Padding([]byte(plaintext), aes.BlockSize)
 
 	// Make new cipher key
 	block, err := aes.NewCipher(key)
