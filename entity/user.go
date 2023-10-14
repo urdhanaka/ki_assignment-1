@@ -37,7 +37,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.Username_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Username_DEC), []byte(utils.GetEnv("KEY"))); err == nil {
+	if enc, err := utils.EncryptDES(u.Username_DEC); err == nil {
 		u.Username_DEC = string(enc)
 	}
 
@@ -51,7 +51,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.Password_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Password_DEC), []byte(utils.GetEnv("KEY"))); err == nil {
+	if enc, err := utils.EncryptDES(u.Password_DEC); err == nil {
 		u.Password_DEC = string(enc)
 	}
 
