@@ -34,21 +34,20 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 
 	// Check file type
 	if fileDTO.Files.Header.Get("Content-Type") != "application/pdf" && fileDTO.Files.Header.Get("Content-Type") != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" && fileDTO.Files.Header.Get("Content-Type") != "application/vnd.openxmlformats-officedocument.wordprocessingml.document" && fileDTO.Files.Header.Get("Content-Type") != "image/jpeg" && fileDTO.Files.Header.Get("Content-Type") != "image/png" && fileDTO.Files.Header.Get("Content-Type") != "video/mp4" {
-		return entity.Files{}, errors.New("File type is not supported")
+		return entity.Files{}, errors.New("file type is not supported")
 	}
 
 	// Check file size
 	if fileDTO.Files.Size > 1000000 {
-		return entity.Files{}, errors.New("File size is too large")
+		return entity.Files{}, errors.New("file size is too large")
 	}
 
 	// Check file name
 	if fileDTO.Files.Filename == "" {
-		return entity.Files{}, errors.New("File name is not valid")
+		return entity.Files{}, errors.New("file name is not valid")
 	}
 
 	// Save the files to the
-
 
 	result, err := f.FileRpository.UploadFile(ctx, file)
 	if err != nil {
@@ -57,7 +56,6 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 
 	return result, nil
 }
-
 
 func (f *fileService) GetAllFiles(ctx context.Context) ([]entity.Files, error) {
 	result, err := f.FileRpository.GetAllFiles(ctx)
