@@ -57,3 +57,43 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 
 	return nil
 }
+
+func (u *User) BeforeUpdate(tx *gorm.DB) error {
+    if tx.Statement.Changed("Username_AES") {
+        if enc, err := utils.EncryptAES(u.Username_AES); err == nil {
+            u.Username_AES = string(enc)
+        }
+    }
+
+    if tx.Statement.Changed("Username_RC4") {
+        if enc, err := utils.EncryptRC4([]byte(u.Username_RC4), []byte(utils.GetEnv("KEY"))); err == nil {
+            u.Username_RC4 = string(enc)
+        }
+    }
+
+    if tx.Statement.Changed("Username_DEC") {
+        if enc, err := utils.EncryptDES(u.Username_DEC); err == nil {
+            u.Username_DEC = string(enc)
+        }
+    }
+
+    if tx.Statement.Changed("Password_AES") {
+        if enc, err := utils.EncryptAES(u.Password_AES); err == nil {
+            u.Password_AES = string(enc)
+        }
+    }
+
+    if tx.Statement.Changed("Password_RC4") {
+        if enc, err := utils.EncryptRC4([]byte(u.Password_RC4), []byte(utils.GetEnv("KEY"))); err == nil {
+            u.Password_RC4 = string(enc)
+        }
+    }
+
+    if tx.Statement.Changed("Password_DEC") {
+        if enc, err := utils.EncryptDES(u.Password_DEC); err == nil {
+            u.Password_DEC = string(enc)
+        }
+    }
+
+    return nil
+}

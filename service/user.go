@@ -12,9 +12,9 @@ import (
 type UserService interface {
 	RegisterUser(ctx context.Context, userDTO dto.UserCreateDto) (entity.User, error)
 	GetAllUser(ctx context.Context) ([]entity.User, error)
-	GetUserByID(ctx context.Context, userID uint64) (entity.User, error)
+	GetUserByID(ctx context.Context, userID string) (entity.User, error)
 	UpdateUser(ctx context.Context, userDTO dto.UserUpdateDto) (entity.User, error)
-	DeleteUser(ctx context.Context, userID uint64) (error)
+	DeleteUser(ctx context.Context, userID string) (error)
 }
 
 type userService struct {
@@ -55,7 +55,7 @@ func (u *userService) GetAllUser(ctx context.Context) ([]entity.User, error) {
 	return result, nil
 }
 
-func (u *userService) DeleteUser(ctx context.Context, userID uint64) (error) {
+func (u *userService) DeleteUser(ctx context.Context, userID string) (error) {
 	err := u.UserRepository.DeleteUser(ctx, userID)
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func (u *userService) DeleteUser(ctx context.Context, userID uint64) (error) {
 	return nil
 }
 
-func (u *userService) GetUserByID(ctx context.Context, userID uint64) (entity.User, error) {
+func (u *userService) GetUserByID(ctx context.Context, userID string) (entity.User, error) {
 	result, err := u.UserRepository.GetUserByID(ctx, userID)
 	if err != nil {
 		return entity.User{}, err

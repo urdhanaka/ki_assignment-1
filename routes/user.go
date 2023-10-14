@@ -11,8 +11,8 @@ func UserRoutes(router *gin.Engine, UserController controllers.UserController) {
 	{
 		user.POST("/register", UserController.RegisterUser)
 		user.GET("/all", UserController.GetAllUser)
-		// user.GET("/:id", userController.GetUserByID)
-		// user.PUT("/:id", userController.UpdateUser)
-		// user.DELETE("/:id", userController.DeleteUser)
+		user.GET("/:id", UserController.GetUserByID)
+		user.PUT("/update/:id", UserController.UpdateUser)
+		user.DELETE("/delete/:id", UserController.DeleteUser)
 	}
 }
