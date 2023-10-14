@@ -14,7 +14,7 @@ type UserService interface {
 	GetAllUser(ctx context.Context) ([]entity.User, error)
 	GetUserByID(ctx context.Context, userID string) (entity.User, error)
 	UpdateUser(ctx context.Context, userDTO dto.UserUpdateDto) (entity.User, error)
-	DeleteUser(ctx context.Context, userID string) (error)
+	DeleteUser(ctx context.Context, userID string) error
 }
 
 type userService struct {
@@ -55,7 +55,7 @@ func (u *userService) GetAllUser(ctx context.Context) ([]entity.User, error) {
 	return result, nil
 }
 
-func (u *userService) DeleteUser(ctx context.Context, userID string) (error) {
+func (u *userService) DeleteUser(ctx context.Context, userID string) error {
 	err := u.UserRepository.DeleteUser(ctx, userID)
 	if err != nil {
 		return err
