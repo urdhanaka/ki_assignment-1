@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
-	"encoding/hex"
+	"encoding/base64"
 )
 
 func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
@@ -40,7 +40,7 @@ func EncryptAES(plaintext string) (string, error) {
 	mode := cipher.NewCBCEncrypter(block, iv)
 	mode.CryptBlocks(ciphertext, bPlaintext)
 
-	return hex.EncodeToString(ciphertext), nil
+	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
 func DecryptAES(ciphertext string) (string, error) {
@@ -48,7 +48,7 @@ func DecryptAES(ciphertext string) (string, error) {
 	key := []byte(GetEnv("KEY"))
 	iv := []byte(GetEnv("IV"))
 
-	ciphertextDecoded, err := hex.DecodeString(ciphertext)
+	ciphertextDecoded, err := base64.StdEncoding.Strict().DecodeString(ciphertext)
 	if err != nil {
 		return "", err
 	}
@@ -60,6 +60,9 @@ func DecryptAES(ciphertext string) (string, error) {
 
 	mode := cipher.NewCBCDecrypter(block, iv)
 	mode.CryptBlocks([]byte(ciphertextDecoded), []byte(ciphertextDecoded))
+
+	// Unpad the byte
+	ciphertextDecoded = PKCS5Unpadding(ciphertextDecoded)
 
 	return string(ciphertextDecoded), nil
 }
