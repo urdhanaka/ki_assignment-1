@@ -3,9 +3,11 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"ki_assignment-1/dto"
 	"ki_assignment-1/entity"
 	"ki_assignment-1/repository"
+	"ki_assignment-1/utils"
 
 	"github.com/google/uuid"
 )
@@ -16,19 +18,20 @@ type FileService interface {
 }
 
 type fileService struct {
-	FileRpository repository.FileRepository
+	FileRepository repository.FileRepository
 }
 
 func NewFileService(fileRepo repository.FileRepository) FileService {
 	return &fileService{
-		FileRpository: fileRepo,
+		FileRepository: fileRepo,
 	}
 }
 
 func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error) {
 	var file entity.Files
+	fileID := uuid.New();
 
-	file.ID = uuid.New()
+	file.ID = fileID
 	file.Name = fileDTO.Name
 	file.UserID, _ = uuid.Parse(fileDTO.UserID)
 
@@ -47,9 +50,13 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 		return entity.Files{}, errors.New("file name is not valid")
 	}
 
-	// Save the files to the
+	// Save the files to the uploads folder
+	fileName := fmt.Sprintf("%s/files/%s", file.UserID, fileID)
+	if err := utils.UploadFileUtility(fileDTO.Files, fileName); err != nil {
+		return entity.Files{}, err
+	}
 
-	result, err := f.FileRpository.UploadFile(ctx, file)
+	result, err := f.FileRepository.UploadFile(ctx, file)
 	if err != nil {
 		return entity.Files{}, err
 	}
@@ -58,7 +65,7 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 }
 
 func (f *fileService) GetAllFiles(ctx context.Context) ([]entity.Files, error) {
-	result, err := f.FileRpository.GetAllFiles(ctx)
+	result, err := f.FileRepository.GetAllFiles(ctx)
 	if err != nil {
 		return []entity.Files{}, err
 	}
