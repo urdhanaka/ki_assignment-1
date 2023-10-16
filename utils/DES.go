@@ -44,5 +44,5 @@ func DecryptDES(ciphertext string) (string, error) {
 	mode.CryptBlocks(originalData, []byte(ciphertextDecoded))
 	originalData = PKCS5Unpadding(originalData)
 
-	return hex.EncodeToString(originalData), nil
+	return string(originalData), nil
 }
