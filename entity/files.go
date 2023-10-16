@@ -30,7 +30,7 @@ func (f *Files) BeforeCreate(tx *gorm.DB) error {
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4([]byte(f.Files_RC4), []byte(utils.GetEnv("KEY"))); err == nil {
+	if enc, err := utils.EncryptRC4(f.Files_RC4); err == nil {
 		f.Files_RC4 = string(enc)
 	}
 

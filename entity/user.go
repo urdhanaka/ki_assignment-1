@@ -33,7 +33,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4), []byte(utils.GetEnv("KEY"))); err == nil {
+	if enc, err := utils.EncryptRC4(u.Username_RC4); err == nil {
 		u.Username_RC4 = string(enc)
 	}
 
@@ -47,7 +47,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4), []byte(utils.GetEnv("KEY"))); err == nil {
+	if enc, err := utils.EncryptRC4(u.Password_RC4); err == nil {
 		u.Password_RC4 = string(enc)
 	}
 
@@ -63,7 +63,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		u.Username_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4), []byte(utils.GetEnv("KEY"))); err == nil {
+	if enc, err := utils.EncryptRC4(u.Password_RC4); err == nil {
 		u.Username_RC4 = string(enc)
 	}
 
@@ -75,7 +75,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		u.Password_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4), []byte(utils.GetEnv("KEY"))); err == nil {
+	if enc, err := utils.EncryptRC4(u.Password_RC4); err == nil {
 		u.Password_RC4 = string(enc)
 	}
 

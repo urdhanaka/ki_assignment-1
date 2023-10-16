@@ -2,33 +2,41 @@ package utils
 
 import (
 	"crypto/rc4"
-	"encoding/hex"
+	"encoding/base64"
 )
 
 // RC4 is cryptographically broken and should not be used for secure
 // applications.
 
-func EncryptRC4(key []byte, data []byte) (string, error) {
+func EncryptRC4(data string) (string, error) {
+	key := []byte(GetEnv("KEY"))
+
+	dataBytes := []byte(data)
+
 	c, err := rc4.NewCipher(key)
 	if err != nil {
 		return "", err
 	}
-	dst := make([]byte, len(data))
-	c.XORKeyStream(dst, data)
+	dst := make([]byte, len(dataBytes))
+	c.XORKeyStream(dst, dataBytes)
 
-	return hex.EncodeToString(dst), nil
+	return base64.StdEncoding.EncodeToString(dst), nil
 }
 
-func DecryptRC4(decrypted []byte, key []byte, encrypted string) error {
+func DecryptRC4(encrypted string) (string, error) {
+	key := []byte(GetEnv("KEY"))
+
 	cipher, err := rc4.NewCipher(key)
 	if err != nil {
-		return err
+		return "", err
 	}
-	encryptedBytes, err := hex.DecodeString(string(encrypted))
+	encryptedBytes, err := base64.StdEncoding.DecodeString(encrypted)
 	if err != nil {
-		return err
+		return "", err
 	}
+
+	decrypted := make([]byte, len(encryptedBytes))
 	cipher.XORKeyStream(decrypted, encryptedBytes)
 
-	return nil
+	return string(decrypted), err
 }
