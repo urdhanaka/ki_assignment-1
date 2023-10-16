@@ -5,6 +5,7 @@ import (
 	"ki_assignment-1/dto"
 	"ki_assignment-1/entity"
 	"ki_assignment-1/repository"
+	"ki_assignment-1/utils"
 
 	"github.com/google/uuid"
 )
@@ -15,6 +16,8 @@ type UserService interface {
 	GetUserByID(ctx context.Context, userID string) (entity.User, error)
 	UpdateUser(ctx context.Context, userDTO dto.UserUpdateDto) (entity.User, error)
 	DeleteUser(ctx context.Context, userID string) error
+	GetAllUserDecrypted(ctx context.Context) ([]entity.User, error)
+	GetUserByIDDecrypted(ctx context.Context, userID string) (entity.User, error)
 }
 
 type userService struct {
@@ -90,4 +93,84 @@ func (u *userService) UpdateUser(ctx context.Context, userDTO dto.UserUpdateDto)
 	}
 
 	return result, nil
+}
+
+func (u *userService) GetAllUserDecrypted(ctx context.Context) ([]entity.User, error) {
+    users, err := u.UserRepository.GetAllUser(ctx)
+    if err != nil {
+        return nil, err
+    }
+
+    for i := range users {
+        decryptedUsernameAES, err := utils.DecryptAES(users[i].Username_AES)
+        if err == nil {
+            users[i].Username_AES = decryptedUsernameAES
+        }
+
+        decryptedPasswordAES, err := utils.DecryptAES(users[i].Password_AES)
+        if err == nil {
+            users[i].Password_AES = decryptedPasswordAES
+        }
+
+        decryptedUsernameDES, err := utils.DecryptDES(users[i].Username_DEC)
+        if err == nil {
+            users[i].Username_DEC = decryptedUsernameDES
+        }
+
+        decryptedPasswordDES, err := utils.DecryptDES(users[i].Password_DEC)
+        if err == nil {
+            users[i].Password_DEC = decryptedPasswordDES
+        }
+
+        decryptedUsernameRC4, err := utils.DecryptRC4(users[i].Username_RC4)
+        if err == nil {
+            users[i].Username_RC4 = decryptedUsernameRC4
+        }
+
+        decryptedPasswordRC4, err := utils.DecryptRC4(users[i].Password_RC4)
+        if err == nil {
+            users[i].Password_RC4 = decryptedPasswordRC4
+        }
+    }
+
+    return users, nil
+}
+
+func (u *userService) GetUserByIDDecrypted(ctx context.Context, userID string) (entity.User, error) {
+    user, err := u.GetUserByID(ctx, userID)
+    if err != nil {
+        return entity.User{}, err
+    }
+
+    decryptedUsernameAES, err := utils.DecryptAES(user.Username_AES)
+        if err == nil {
+            user.Username_AES = decryptedUsernameAES
+        }
+
+        decryptedPasswordAES, err := utils.DecryptAES(user.Password_AES)
+        if err == nil {
+            user.Password_AES = decryptedPasswordAES
+        }
+
+        decryptedUsernameDES, err := utils.DecryptDES(user.Username_DEC)
+        if err == nil {
+            user.Username_DEC = decryptedUsernameDES
+        }
+
+        decryptedPasswordDES, err := utils.DecryptDES(user.Password_DEC)
+        if err == nil {
+            user.Password_DEC = decryptedPasswordDES
+        }
+
+        decryptedUsernameRC4, err := utils.DecryptRC4(user.Username_RC4)
+        if err == nil {
+            user.Username_RC4 = decryptedUsernameRC4
+        }
+
+        decryptedPasswordRC4, err := utils.DecryptRC4(user.Password_RC4)
+        if err == nil {
+            user.Password_RC4 = decryptedPasswordRC4
+        }
+
+    return user, nil
 }

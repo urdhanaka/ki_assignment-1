@@ -14,6 +14,8 @@ type UserController interface {
 	GetUserByID(c *gin.Context)
 	UpdateUser(c *gin.Context)
 	DeleteUser(c *gin.Context)
+	GetAllUserDecrypted(c *gin.Context)
+	GetUserByIDDecrypted(c *gin.Context)
 }
 
 type userController struct {
@@ -92,4 +94,26 @@ func (u *userController) DeleteUser(c *gin.Context) {
     }
 
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+}
+
+func (u *userController) GetAllUserDecrypted(c *gin.Context) {
+    users, err := u.UserService.GetAllUserDecrypted(c)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, users)
+}
+
+func (u *userController) GetUserByIDDecrypted(c *gin.Context) {
+    id := c.Param("id")
+
+    user, err := u.UserService.GetUserByIDDecrypted(c, id)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, user)
 }
