@@ -12,7 +12,8 @@ type UserController interface {
 	RegisterUser(c *gin.Context)
 	GetAllUser(c *gin.Context)
 	GetUserByID(c *gin.Context)
-	UpdateUser(c *gin.Context)
+	UpdateCredentialUser(c *gin.Context)
+	UpdateIdentityUser(c *gin.Context)
 	DeleteUser(c *gin.Context)
 	GetAllUserDecrypted(c *gin.Context)
 	GetUserByIDDecrypted(c *gin.Context)
@@ -31,7 +32,7 @@ func NewUserController(userService service.UserService) UserController {
 func (u *userController) RegisterUser(c *gin.Context) {
 	var userDTO dto.UserCreateDto
 
-	if err := c.ShouldBindJSON(&userDTO); err != nil {
+	if err := c.ShouldBind(&userDTO); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -56,26 +57,43 @@ func (u *userController) GetAllUser(c *gin.Context) {
 }
 
 func (u *userController) GetUserByID(c *gin.Context) {
-    id := c.Param("id")
+	id := c.Param("id")
 
-    user, err := u.UserService.GetUserByID(c, id)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
+	user, err := u.UserService.GetUserByID(c, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-    c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, user)
 }
 
-func (u *userController) UpdateUser(c *gin.Context) {
-	var userDTO dto.UserUpdateDto
+func (u *userController) UpdateCredentialUser(c *gin.Context) {
+	var userDTO dto.UserCredentialUpdateDto
 
 	if err := c.ShouldBindJSON(&userDTO); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	user, err := u.UserService.UpdateUser(c, userDTO)
+	user, err := u.UserService.CredentialUpdateUser(c, userDTO)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+func (u *userController) UpdateIdentityUser(c *gin.Context) {
+	var userDTO dto.UserIdentityUpdateDto
+
+	if err := c.ShouldBindJSON(&userDTO); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := u.UserService.IdentityUpdateUser(c, userDTO)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -88,32 +106,32 @@ func (u *userController) DeleteUser(c *gin.Context) {
 	id := c.Param("id")
 
 	err := u.UserService.DeleteUser(c, id)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 }
 
 func (u *userController) GetAllUserDecrypted(c *gin.Context) {
-    users, err := u.UserService.GetAllUserDecrypted(c)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
+	users, err := u.UserService.GetAllUserDecrypted(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-    c.JSON(http.StatusOK, users)
+	c.JSON(http.StatusOK, users)
 }
 
 func (u *userController) GetUserByIDDecrypted(c *gin.Context) {
-    id := c.Param("id")
+	id := c.Param("id")
 
-    user, err := u.UserService.GetUserByIDDecrypted(c, id)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
+	user, err := u.UserService.GetUserByIDDecrypted(c, id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-    c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, user)
 }

@@ -33,7 +33,6 @@ func NewFileService(fileRepo repository.FileRepository) FileService {
 func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error) {
 	var file entity.Files
 
-
 	file.ID = uuid.New()
 	file.Name = fileDTO.Name
 	file.Files_AES = fileDTO.Files.Filename

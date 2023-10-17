@@ -11,14 +11,21 @@ type UserCreateDto struct {
 	Name     string                `json:"name" binding:"required"`
 	Number   string                `json:"number" binding:"required"`
 	CV       *multipart.FileHeader `json:"cv" binding:"required"`
-	Video    *multipart.FileHeader `json:"video" binding:"required"`
 	ID_Card  *multipart.FileHeader `json:"id_card" binding:"required"`
 	Username string                `json:"username" binding:"required"`
 	Password string                `json:"password" binding:"required"`
 }
 
-type UserUpdateDto struct {
+type UserCredentialUpdateDto struct {
 	ID       uuid.UUID `json:"id" binding:"required"`
 	Username string    `json:"username" binding:"required"`
 	Password string    `json:"password" binding:"required"`
+}
+
+type UserIdentityUpdateDto struct {
+	ID      uuid.UUID             `json:"id" binding:"required"`
+	Name    string                `json:"name" binding:"required"`
+	Number  string                `json:"number" binding:"required"`
+	CV      *multipart.FileHeader `json:"cv" binding:"required"`
+	ID_Card *multipart.FileHeader `json:"id_card" binding:"required"`
 }
