@@ -25,16 +25,16 @@ func (Files) TableName() string {
 
 func (f *Files) BeforeCreate(tx *gorm.DB) error {
 	// Done
-	if enc, err := utils.EncryptAES(f.Files_AES); err == nil {
+	if enc, err := utils.EncryptAES([]byte(f.Files_AES)); err == nil {
 		f.Files_AES = string(enc)
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4(f.Files_RC4); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(f.Files_RC4)); err == nil {
 		f.Files_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES(f.Files_DEC); err == nil {
+	if enc, err := utils.EncryptDES([]byte(f.Files_DEC)); err == nil {
 		f.Files_DEC = string(enc)
 	}
 

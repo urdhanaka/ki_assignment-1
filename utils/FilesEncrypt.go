@@ -40,3 +40,26 @@ func UploadFileUtility(file *multipart.FileHeader, path string) error {
 
 	return nil
 }
+
+func GetFileUtility(path string) ([]byte, error) {
+	// Get it from /uploads/userid/files/[fileid]
+	// parts := strings.Split(path, "/")
+
+	// fileId := parts[2]
+	fileId := path
+	userID := "96052b2b-02a8-4747-8210-6d4820804dd5"
+
+	filePath := fmt.Sprintf("uploads/%s/files/%s", userID, fileId)
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	fileData, err := io.ReadAll(file)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return fileData, nil
+}

@@ -10,6 +10,6 @@ func FileRoutes(router *gin.Engine, FileController controllers.FileController) {
 	file := router.Group("/file")
 	{
 		file.POST("/upload", FileController.UploadFile)
-		file.GET("/all", FileController.GetAllFiles)
+		file.GET("/detail", FileController.GetFile)
 	}
 }

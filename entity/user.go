@@ -28,30 +28,30 @@ func (User) TableName() string {
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	// Done
-	if enc, err := utils.EncryptAES(u.Username_AES); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.Username_AES)); err == nil {
 		u.Username_AES = string(enc)
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4(u.Username_RC4); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4)); err == nil {
 		u.Username_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES(u.Username_DEC); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Username_DEC)); err == nil {
 		u.Username_DEC = string(enc)
 	}
 
 	// Done
-	if enc, err := utils.EncryptAES(u.Password_AES); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.Password_AES)); err == nil {
 		u.Password_AES = string(enc)
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4(u.Password_RC4); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4)); err == nil {
 		u.Password_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES(u.Password_DEC); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Password_DEC)); err == nil {
 		u.Password_DEC = string(enc)
 	}
 
@@ -59,27 +59,31 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 }
 
 func (u *User) BeforeUpdate(tx *gorm.DB) error {
-	if enc, err := utils.EncryptAES(u.Username_AES); err == nil {
+	// Done
+	if enc, err := utils.EncryptAES([]byte(u.Username_AES)); err == nil {
 		u.Username_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4(u.Password_RC4); err == nil {
+	// Done
+	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4)); err == nil {
 		u.Username_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES(u.Username_DEC); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Username_DEC)); err == nil {
 		u.Username_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptAES(u.Password_AES); err == nil {
+	// Done
+	if enc, err := utils.EncryptAES([]byte(u.Password_AES)); err == nil {
 		u.Password_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4(u.Password_RC4); err == nil {
+	// Done
+	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4)); err == nil {
 		u.Password_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES(u.Password_DEC); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Password_DEC)); err == nil {
 		u.Password_DEC = string(enc)
 	}
 

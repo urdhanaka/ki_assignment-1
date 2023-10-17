@@ -8,17 +8,15 @@ import (
 // RC4 is cryptographically broken and should not be used for secure
 // applications.
 
-func EncryptRC4(data string) (string, error) {
+func EncryptRC4(data []byte) (string, error) {
 	key := []byte(GetEnv("KEY"))
-
-	dataBytes := []byte(data)
 
 	c, err := rc4.NewCipher(key)
 	if err != nil {
 		return "", err
 	}
-	dst := make([]byte, len(dataBytes))
-	c.XORKeyStream(dst, dataBytes)
+	dst := make([]byte, len(data))
+	c.XORKeyStream(dst, data)
 
 	return base64.StdEncoding.EncodeToString(dst), nil
 }

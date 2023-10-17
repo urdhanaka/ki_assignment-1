@@ -5,6 +5,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/base64"
+	"fmt"
 )
 
 func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
@@ -21,13 +22,13 @@ func PKCS5Unpadding(src []byte) []byte {
 	return src[:(length - unpadding)]
 }
 
-func EncryptAES(plaintext string) (string, error) {
+func EncryptAES(plaintext []byte) (string, error) {
 	// Retrieve the key and iv
 	key := []byte(GetEnv("KEY"))
 	iv := []byte(GetEnv("IV"))
 
 	// Use padding function
-	bPlaintext := PKCS5Padding([]byte(plaintext), aes.BlockSize)
+	bPlaintext := PKCS5Padding(plaintext, aes.BlockSize)
 
 	// Make new cipher key
 	block, err := aes.NewCipher(key)
@@ -48,14 +49,15 @@ func DecryptAES(ciphertext string) (string, error) {
 	key := []byte(GetEnv("KEY"))
 	iv := []byte(GetEnv("IV"))
 
-	ciphertextDecoded, err := base64.StdEncoding.Strict().DecodeString(ciphertext)
+	// Decode the base64 ciphertext
+	ciphertextDecoded, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("base64 decoding error: %v", err)
 	}
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("AES cipher creation error: %v", err)
 	}
 
 	mode := cipher.NewCBCDecrypter(block, iv)

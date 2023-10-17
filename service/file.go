@@ -15,6 +15,7 @@ import (
 type FileService interface {
 	UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error)
 	GetAllFiles(ctx context.Context) ([]entity.Files, error)
+	DecryptFile(filename string, encryptionMethod string) (string, error)
 }
 
 type fileService struct {
@@ -33,6 +34,9 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 
 	file.ID = fileID
 	file.Name = fileDTO.Name
+	file.Files_AES = fileDTO.Files.Filename
+	file.Files_RC4 = fileDTO.Files.Filename
+	file.Files_DEC = fileDTO.Files.Filename
 	file.UserID, _ = uuid.Parse(fileDTO.UserID)
 
 	// Check file type
@@ -71,4 +75,17 @@ func (f *fileService) GetAllFiles(ctx context.Context) ([]entity.Files, error) {
 	}
 
 	return result, nil
+}
+
+func (f *fileService) DecryptFile(filename string, encryptionMethod string) (string, error) {
+
+	if encryptionMethod == "AES" {
+		return utils.DecryptAES(filename)
+	} else if encryptionMethod == "RC4" {
+		return utils.DecryptRC4(filename)
+	} else if encryptionMethod == "DES" {
+		return utils.DecryptDES(filename)
+	} else {
+		return "", errors.New("encryption method is not valid")
+	}
 }

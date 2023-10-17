@@ -3,10 +3,10 @@ package utils
 import (
 	"crypto/cipher"
 	"crypto/des"
-	"encoding/hex"
+	"encoding/base64"
 )
 
-func EncryptDES(plaintext string) (string, error) {
+func EncryptDES(plaintext []byte) (string, error) {
 	key := []byte(GetEnv("KEY8"))
 	iv := []byte(GetEnv("IV8"))
 
@@ -17,19 +17,19 @@ func EncryptDES(plaintext string) (string, error) {
 	}
 
 	// Use padding to plaintext
-	bPlaintext := PKCS5Padding([]byte(plaintext), block.BlockSize())
+	bPlaintext := PKCS5Padding(plaintext, block.BlockSize())
 	mode := cipher.NewCBCEncrypter(block, iv)
 	ciphertext := make([]byte, len(bPlaintext))
 	mode.CryptBlocks(ciphertext, bPlaintext)
 
-	return hex.EncodeToString(ciphertext), nil
+	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }
 
 func DecryptDES(ciphertext string) (string, error) {
 	key := []byte(GetEnv("KEY8"))
 	iv := []byte(GetEnv("IV8"))
 
-	ciphertextDecoded, err := hex.DecodeString(ciphertext)
+	ciphertextDecoded, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {
 		return "", err
 	}
