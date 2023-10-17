@@ -9,7 +9,7 @@ import (
 )
 
 func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
-	padding := (blockSize - len(ciphertext)%blockSize)
+	padding := blockSize - len(ciphertext)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 
 	return append(ciphertext, padtext...)
@@ -17,6 +17,10 @@ func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
 
 func PKCS5Unpadding(src []byte) []byte {
 	length := len(src)
+
+	if length == 0 {
+		return nil
+	}
 	unpadding := int(src[length-1])
 
 	return src[:(length - unpadding)]
@@ -64,7 +68,8 @@ func DecryptAES(ciphertext string) (string, error) {
 	mode.CryptBlocks([]byte(ciphertextDecoded), []byte(ciphertextDecoded))
 
 	// Unpad the byte
-	ciphertextDecoded = PKCS5Unpadding(ciphertextDecoded)
+	test := PKCS5Unpadding(ciphertextDecoded)
+	// ciphertextDecoded = PKCS5Unpadding(ciphertextDecoded)
 
-	return string(ciphertextDecoded), nil
+	return string(test), nil
 }
