@@ -14,6 +14,8 @@ type FileConnection struct {
 type FileRepository interface {
 	UploadFile(ctx context.Context, file entity.Files) (entity.Files, error)
 	GetAllFiles(ctx context.Context) ([]entity.Files, error)
+	GetFile(ctx context.Context, fileID string) (entity.Files, error)
+	GetFileByUserID(ctx context.Context, userID string) ([]entity.Files, error)
 }
 
 func NewFileRepository(db *gorm.DB) FileRepository {
@@ -36,6 +38,28 @@ func (db *FileConnection) GetAllFiles(ctx context.Context) ([]entity.Files, erro
 	var files []entity.Files
 
 	if err := db.connection.Find(&files).Error; err != nil {
+		return []entity.Files{}, err
+	}
+
+	return files, nil
+}
+
+// Get File
+func (db *FileConnection) GetFile(ctx context.Context, fileID string) (entity.Files, error) {
+	var file entity.Files
+
+	if err := db.connection.Where("id = ?", fileID).First(&file).Error; err != nil {
+		return entity.Files{}, err
+	}
+
+	return file, nil
+}
+
+//  Get File by user id
+func (db *FileConnection) GetFileByUserID(ctx context.Context, userID string) ([]entity.Files, error) {
+	var files []entity.Files
+
+	if err := db.connection.Where("user_id = ? AND deleted_at IS NULL", userID).Find(&files).Error; err != nil {
 		return []entity.Files{}, err
 	}
 

@@ -16,6 +16,8 @@ type FileService interface {
 	UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error)
 	GetAllFiles(ctx context.Context) ([]entity.Files, error)
 	DecryptFile(filename string, encryptionMethod string) (string, error)
+	GetFile(ctx context.Context, fileID string) (entity.Files, error)
+	GetFileByUserID(ctx context.Context, userID string) ([]entity.Files, error)
 }
 
 type fileService struct {
@@ -30,9 +32,9 @@ func NewFileService(fileRepo repository.FileRepository) FileService {
 
 func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error) {
 	var file entity.Files
-	fileID := uuid.New();
 
-	file.ID = fileID
+
+	file.ID = uuid.New()
 	file.Name = fileDTO.Name
 	file.Files_AES = fileDTO.Files.Filename
 	file.Files_RC4 = fileDTO.Files.Filename
@@ -55,7 +57,7 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 	}
 
 	// Save the files to the uploads folder
-	fileName := fmt.Sprintf("%s/files/%s", file.UserID, fileID)
+	fileName := fmt.Sprintf("%s/files/%s", file.UserID, file.ID)
 	if err := utils.UploadFileUtility(fileDTO.Files, fileName); err != nil {
 		return entity.Files{}, err
 	}
@@ -88,4 +90,24 @@ func (f *fileService) DecryptFile(filename string, encryptionMethod string) (str
 	} else {
 		return "", errors.New("encryption method is not valid")
 	}
+}
+
+// Get File from repository
+func (f *fileService) GetFile(ctx context.Context, fileID string) (entity.Files, error) {
+	result, err := f.FileRepository.GetFile(ctx, fileID)
+	if err != nil {
+		return entity.Files{}, err
+	}
+
+	return result, nil
+}
+
+// Get File by User id
+func (f *fileService) GetFileByUserID(ctx context.Context, userID string) ([]entity.Files, error) {
+	result, err := f.FileRepository.GetFileByUserID(ctx, userID)
+	if err != nil {
+		return []entity.Files{}, err
+	}
+
+	return result, nil
 }

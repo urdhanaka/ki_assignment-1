@@ -8,7 +8,7 @@ import (
 )
 
 type Files struct {
-	ID        uuid.UUID `gorm:"primary_key" json:"id"`
+	ID        uuid.UUID `gorm:"primary_key;not_null;type:char(36)" json:"id"`
 	Name      string    `json:"name" binding:"required"`
 	Files_AES string    `json:"files_aes" binding:"required"`
 	Files_RC4 string    `json:"files_rc4" binding:"required"`

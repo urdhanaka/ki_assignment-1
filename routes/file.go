@@ -11,5 +11,7 @@ func FileRoutes(router *gin.Engine, FileController controllers.FileController) {
 	{
 		file.POST("/upload", FileController.UploadFile)
 		file.GET("/detail", FileController.GetFile)
+		// Get file by user id with param user id
+		file.GET("/user", FileController.GetFileByUserID)
 	}
 }

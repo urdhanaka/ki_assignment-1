@@ -13,6 +13,7 @@ import (
 type FileController interface {
 	UploadFile(c *gin.Context)
 	GetFile(c *gin.Context)
+	GetFileByUserID(c *gin.Context)
 }
 
 type fileController struct {
@@ -69,4 +70,19 @@ func (f *fileController) GetFile(c *gin.Context) {
 		return
 	}
 	c.File(filePath)
+}
+
+// Get File by user id
+func (f *fileController) GetFileByUserID(c *gin.Context) {
+	userID := c.Query("user_id")
+
+	fmt.Println(userID)
+
+	files, err := f.FileService.GetFileByUserID(c, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, files)
 }
