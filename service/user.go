@@ -226,6 +226,7 @@ func (u *userService) GetUserByIDDecrypted(ctx context.Context, userID string) (
 		return entity.User{}, err
 	}
 
+	// Credential
 	decryptedUsernameAES, err := utils.DecryptAES(user.Username_AES)
 	if err == nil {
 		user.Username_AES = decryptedUsernameAES
@@ -254,6 +255,37 @@ func (u *userService) GetUserByIDDecrypted(ctx context.Context, userID string) (
 	decryptedPasswordRC4, err := utils.DecryptRC4(user.Password_RC4)
 	if err == nil {
 		user.Password_RC4 = decryptedPasswordRC4
+	}
+
+	// Identity
+	decryptedNameAES, err := utils.DecryptAES(user.Name_AES)
+	if err == nil {
+		user.Name_AES = decryptedNameAES
+	}
+
+	decryptedNameDES, err := utils.DecryptDES(user.Name_DEC)
+	if err == nil {
+		user.Name_DEC = decryptedNameDES
+	}
+
+	decryptedNameRC4, err := utils.DecryptRC4(user.Name_RC4)
+	if err == nil {
+		user.Name_RC4 = decryptedNameRC4
+	}
+
+	decryptedNumberAES, err := utils.DecryptAES(user.Number_AES)
+	if err == nil {
+		user.Number_AES = decryptedNumberAES
+	}
+
+	decryptedNumberDES, err := utils.DecryptDES(user.Number_DEC)
+	if err == nil {
+		user.Number_DEC = decryptedNumberDES
+	}
+
+	decryptedNumberRC4, err := utils.DecryptRC4(user.Number_RC4)
+	if err == nil {
+		user.Number_RC4 = decryptedNumberRC4
 	}
 
 	return user, nil
