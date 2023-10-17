@@ -6,6 +6,7 @@ import (
 	"crypto/cipher"
 	"encoding/base64"
 	"fmt"
+	"time"
 )
 
 func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
@@ -27,6 +28,8 @@ func PKCS5Unpadding(src []byte) []byte {
 }
 
 func EncryptAES(plaintext []byte) (string, error) {
+	start := time.Now()
+
 	// Retrieve the key and iv
 	key := []byte(GetEnv("KEY"))
 	iv := []byte(GetEnv("IV"))
@@ -45,10 +48,19 @@ func EncryptAES(plaintext []byte) (string, error) {
 	mode := cipher.NewCBCEncrypter(block, iv)
 	mode.CryptBlocks(ciphertext, bPlaintext)
 
-	return base64.StdEncoding.EncodeToString(ciphertext), nil
+	res := base64.StdEncoding.EncodeToString(ciphertext)
+
+	// Time ends here
+	elapsed := time.Since(start)
+
+	fmt.Println("Encryption time: ", elapsed)
+
+	return res, nil
 }
 
 func DecryptAES(ciphertext string) (string, error) {
+	start := time.Now()
+
 	// Retrieve the key and iv
 	key := []byte(GetEnv("KEY"))
 	iv := []byte(GetEnv("IV"))
@@ -68,8 +80,12 @@ func DecryptAES(ciphertext string) (string, error) {
 	mode.CryptBlocks([]byte(ciphertextDecoded), []byte(ciphertextDecoded))
 
 	// Unpad the byte
-	test := PKCS5Unpadding(ciphertextDecoded)
-	// ciphertextDecoded = PKCS5Unpadding(ciphertextDecoded)
+	ciphertextDecoded = PKCS5Unpadding(ciphertextDecoded)
 
-	return string(test), nil
+	// time ends here
+	elapsed := time.Since(start)
+
+	fmt.Println("Decryption time: ", elapsed)
+
+	return string(ciphertextDecoded), nil
 }
