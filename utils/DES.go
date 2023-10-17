@@ -4,9 +4,15 @@ import (
 	"crypto/cipher"
 	"crypto/des"
 	"encoding/base64"
+	"time"
 )
 
 func EncryptDES(plaintext []byte) (string, error) {
+
+	elapsedTime := timer("DES-Encrypt")
+	defer elapsedTime()
+	time.Sleep(1 * time.Second)
+
 	key := []byte(GetEnv("KEY8"))
 	iv := []byte(GetEnv("IV8"))
 
@@ -22,10 +28,17 @@ func EncryptDES(plaintext []byte) (string, error) {
 	ciphertext := make([]byte, len(bPlaintext))
 	mode.CryptBlocks(ciphertext, bPlaintext)
 
-	return base64.StdEncoding.EncodeToString(ciphertext), nil
+	res := base64.StdEncoding.EncodeToString(ciphertext)
+
+	return res, nil
 }
 
 func DecryptDES(ciphertext string) (string, error) {
+
+	elapsedTime := timer("DES-Decrypt")
+	defer elapsedTime()
+	time.Sleep(1 * time.Second)
+	
 	key := []byte(GetEnv("KEY8"))
 	iv := []byte(GetEnv("IV8"))
 

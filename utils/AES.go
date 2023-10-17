@@ -28,7 +28,10 @@ func PKCS5Unpadding(src []byte) []byte {
 }
 
 func EncryptAES(plaintext []byte) (string, error) {
-	start := time.Now()
+
+	elapsedTime := timer("AES-Encrypt")
+	defer elapsedTime()
+	time.Sleep(1 * time.Second)
 
 	// Retrieve the key and iv
 	key := []byte(GetEnv("KEY"))
@@ -50,16 +53,14 @@ func EncryptAES(plaintext []byte) (string, error) {
 
 	res := base64.StdEncoding.EncodeToString(ciphertext)
 
-	// Time ends here
-	elapsed := time.Since(start)
-
-	fmt.Println("Encryption time: ", elapsed)
-
 	return res, nil
 }
 
 func DecryptAES(ciphertext string) (string, error) {
-	start := time.Now()
+
+	elapsedTime := timer("AES-Decrypt")
+	defer elapsedTime()
+	time.Sleep(1 * time.Second)
 
 	// Retrieve the key and iv
 	key := []byte(GetEnv("KEY"))
@@ -81,11 +82,6 @@ func DecryptAES(ciphertext string) (string, error) {
 
 	// Unpad the byte
 	ciphertextDecoded = PKCS5Unpadding(ciphertextDecoded)
-
-	// time ends here
-	elapsed := time.Since(start)
-
-	fmt.Println("Decryption time: ", elapsed)
 
 	return string(ciphertextDecoded), nil
 }
