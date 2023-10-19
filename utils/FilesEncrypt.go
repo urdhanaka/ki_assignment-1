@@ -46,25 +46,30 @@ func UploadFileUtility(file *multipart.FileHeader, path string) error {
 	return nil
 }
 
-func GetFileUtility(path string) ([]byte, error) {
-	// Get it from /uploads/userid/files/[fileid]
-	// parts := strings.Split(path, "/")
-
-	// fileId := parts[2]
-	fileId := path
-	userID := "96052b2b-02a8-4747-8210-6d4820804dd5"
-
-	filePath := fmt.Sprintf("uploads/%s/files/%s", userID, fileId)
-
-	file, err := os.Open(filePath)
+func GetFileUtility(path string) (string, error) {
+	file, err := os.Open(path)
 	if err != nil {
-		return []byte{}, err
+		return "path", err
 	}
 
 	fileData, err := io.ReadAll(file)
 	if err != nil {
-		return []byte{}, err
+		return "path", err
 	}
 
-	return fileData, nil
+	decryptedFileData, err := DecryptAESFile(fileData)
+	if err != nil {
+		return "", err
+	}
+
+	pathSplit := strings.Split(path, "/")
+
+	tempPath := fmt.Sprintf("%s/%s/temp", pathSplit[0], pathSplit[1])
+
+	err = os.WriteFile(tempPath, decryptedFileData, 0666)
+	if err != nil {
+		return "", err
+	}
+
+	return tempPath, nil
 }

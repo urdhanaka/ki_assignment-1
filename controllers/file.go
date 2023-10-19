@@ -52,8 +52,14 @@ func (f *fileController) GetFile(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(filePath)
-	_, err = os.Stat(filePath)
+	DecryptedFilePath, err := f.FileService.GetFile(c, filePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	fmt.Println(DecryptedFilePath)
+	_, err = os.Stat(DecryptedFilePath)
 	if os.IsNotExist(err) {
 		res := gin.H{
 			"status":  "error",
@@ -62,7 +68,13 @@ func (f *fileController) GetFile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-	c.File(filePath)
+	c.File(DecryptedFilePath)
+	
+	err = os.Remove(DecryptedFilePath)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 }
 
 // Get File by user id

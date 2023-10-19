@@ -16,7 +16,7 @@ type FileService interface {
 	UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error)
 	GetAllFiles(ctx context.Context) ([]entity.Files, error)
 	GetFilePath(ctx context.Context, filename string) (string, error)
-	GetFile(ctx context.Context, fileID string) (entity.Files, error)
+	GetFile(ctx context.Context, filePath string) (string, error)
 	GetFileByUserID(ctx context.Context, userID string) ([]entity.Files, error)
 }
 
@@ -101,13 +101,13 @@ func (f *fileService) GetFilePath(ctx context.Context, filename string) (string,
 }
 
 // Get File from repository
-func (f *fileService) GetFile(ctx context.Context, fileID string) (entity.Files, error) {
-	result, err := f.FileRepository.GetFile(ctx, fileID)
+func (f *fileService) GetFile(ctx context.Context, filePath string) (string, error) {
+	res, err := utils.GetFileUtility(filePath)
 	if err != nil {
-		return entity.Files{}, err
+		return "", err
 	}
 
-	return result, nil
+	return res, nil
 }
 
 // Get File by User id
