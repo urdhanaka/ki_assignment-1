@@ -45,20 +45,13 @@ func (f *fileController) UploadFile(c *gin.Context) {
 
 func (f *fileController) GetFile(c *gin.Context) {
 	fileName := c.Query("filename")
-	encryptionMethod := c.Query("encryption_method")
 
-	fileDecrypt, err := f.FileService.DecryptFile(fileName, encryptionMethod)
+	filePath, err := f.FileService.GetFilePath(c, fileName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	fmt.Println(encryptionMethod, fileDecrypt)
-
-	// Get the uuid from db
-	fileID := c.Query("file_id")
-
-	filePath := fmt.Sprintf("uploads/96052b2b-02a8-4747-8210-6d4820804dd5/files/%s", fileID)
 	fmt.Println(filePath)
 	_, err = os.Stat(filePath)
 	if os.IsNotExist(err) {

@@ -15,7 +15,7 @@ import (
 type FileService interface {
 	UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error)
 	GetAllFiles(ctx context.Context) ([]entity.Files, error)
-	DecryptFile(filename string, encryptionMethod string) (string, error)
+	GetFilePath(ctx context.Context, filename string) (string, error)
 	GetFile(ctx context.Context, fileID string) (entity.Files, error)
 	GetFileByUserID(ctx context.Context, userID string) ([]entity.Files, error)
 }
@@ -78,17 +78,26 @@ func (f *fileService) GetAllFiles(ctx context.Context) ([]entity.Files, error) {
 	return result, nil
 }
 
-func (f *fileService) DecryptFile(filename string, encryptionMethod string) (string, error) {
+func (f *fileService) GetFilePath(ctx context.Context, filename string) (string, error) {
 
-	if encryptionMethod == "AES" {
-		return utils.DecryptAES(filename)
-	} else if encryptionMethod == "RC4" {
-		return utils.DecryptRC4(filename)
-	} else if encryptionMethod == "DES" {
-		return utils.DecryptDES(filename)
-	} else {
-		return "", errors.New("encryption method is not valid")
+	encryptedFilenameAES, err := utils.EncryptAES([]byte(filename))
+	if err == nil {
+		filename = string(encryptedFilenameAES)
 	}
+
+	fileID, err := f.FileRepository.GetFileID(ctx, filename)
+	if err != nil {
+		return filename, err
+	}
+
+	userID, err := f.FileRepository.GetUserIDfromFilename(ctx, filename)
+	if err != nil {
+		return filename, err
+	}
+
+	result := fmt.Sprintf("uploads/%s/files/%s", userID, fileID)
+	
+	return result, nil
 }
 
 // Get File from repository
