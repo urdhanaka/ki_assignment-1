@@ -85,3 +85,56 @@ func DecryptAES(ciphertext string) (string, error) {
 
 	return string(ciphertextDecoded), nil
 }
+
+func EncryptAESFile(plainfile []byte) ([]byte, error) {
+
+	elapsedTime := timer("AES-Encrypt")
+	defer elapsedTime()
+	time.Sleep(1 * time.Second)
+
+	// Retrieve the key and iv
+	key := []byte(GetEnv("KEY"))
+	iv := []byte(GetEnv("IV"))
+
+	// Use padding function
+	bplainfile := PKCS5Padding(plainfile, aes.BlockSize)
+
+	// Make new cipher key
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+
+	// Make a variable to hold the ciphertext
+	cipherfile := make([]byte, len(bplainfile))
+	mode := cipher.NewCBCEncrypter(block, iv)
+	mode.CryptBlocks(cipherfile, bplainfile)
+
+	return cipherfile, nil
+}
+
+func DecryptAESFile(cipherfile []byte) ([]byte, error) {
+
+	elapsedTime := timer("AES-Decrypt")
+	defer elapsedTime()
+	time.Sleep(1 * time.Second)
+
+	// Retrieve the key and iv
+	key := []byte(GetEnv("KEY"))
+	iv := []byte(GetEnv("IV"))
+
+	// Decode the base64 cipherfile
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, fmt.Errorf("AES cipher creation error: %v", err)
+	}
+
+	mode := cipher.NewCBCDecrypter(block, iv)
+	mode.CryptBlocks(cipherfile, cipherfile)
+
+	// Unpad the byte
+	cipherfile = PKCS5Unpadding(cipherfile)
+
+	return cipherfile, nil
+}

@@ -33,7 +33,12 @@ func UploadFileUtility(file *multipart.FileHeader, path string) error {
 		return err
 	}
 
-	err = os.WriteFile(filePath, fileData, 0666)
+	encryptedFileData, err := EncryptAESFile(fileData)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(filePath, encryptedFileData, 0666)
 	if err != nil {
 		return err
 	}
