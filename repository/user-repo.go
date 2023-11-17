@@ -17,6 +17,7 @@ type UserRepository interface {
 	GetUserByID(ctx context.Context, userID string) (entity.User, error)
 	UpdateUser(ctx context.Context, user entity.User) (entity.User, error)
 	DeleteUser(ctx context.Context, userID string) (error)
+	GetUserByUsername(username string) (entity.User, error)
 
 	CalculateAESAlgorithmTime(start int64, end int64) uint64
 }
@@ -74,4 +75,14 @@ func (db *UserConnection) DeleteUser(ctx context.Context, userID string) (error)
 func (db *UserConnection) CalculateAESAlgorithmTime(start int64, end int64) uint64 {
 	var timeElapsed uint64 = uint64(end - start)
 	return timeElapsed
+}
+
+func (db *UserConnection) GetUserByUsername(username string) (entity.User, error) {
+	var user entity.User
+
+	if err := db.connection.Where("username = ?", username).Take(&user).Error; err != nil {
+		return entity.User{}, err
+	}
+
+	return user, nil
 }

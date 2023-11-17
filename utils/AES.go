@@ -27,15 +27,15 @@ func PKCS5Unpadding(src []byte) []byte {
 	return src[:(length - unpadding)]
 }
 
-func EncryptAES(plaintext []byte) (string, error) {
+func EncryptAES(plaintext []byte, secretKeyParam string, ivParam string) (string, error) {
 
 	elapsedTime := timer("AES-Encrypt")
 	defer elapsedTime()
 	time.Sleep(1 * time.Second)
 
 	// Retrieve the key and iv
-	key := []byte(GetEnv("KEY"))
-	iv := []byte(GetEnv("IV"))
+	key := []byte(secretKeyParam)
+	iv := []byte(ivParam)
 
 	// Use padding function
 	bPlaintext := PKCS5Padding(plaintext, aes.BlockSize)
@@ -56,15 +56,15 @@ func EncryptAES(plaintext []byte) (string, error) {
 	return res, nil
 }
 
-func DecryptAES(ciphertext string) (string, error) {
+func DecryptAES(ciphertext string, secretKeyParam string, ivParam string) (string, error) {
 
 	elapsedTime := timer("AES-Decrypt")
 	defer elapsedTime()
 	time.Sleep(1 * time.Second)
 
 	// Retrieve the key and iv
-	key := []byte(GetEnv("KEY"))
-	iv := []byte(GetEnv("IV"))
+	key := []byte(secretKeyParam)
+	iv := []byte(ivParam)
 
 	// Decode the base64 ciphertext
 	ciphertextDecoded, err := base64.StdEncoding.DecodeString(ciphertext)
@@ -86,15 +86,15 @@ func DecryptAES(ciphertext string) (string, error) {
 	return string(ciphertextDecoded), nil
 }
 
-func EncryptAESFile(plainfile []byte) ([]byte, error) {
+func EncryptAESFile(plainfile []byte, secretKeyParam string, ivParam string) ([]byte, error) {
 
 	elapsedTime := timer("AES-Encrypt")
 	defer elapsedTime()
 	time.Sleep(1 * time.Second)
 
 	// Retrieve the key and iv
-	key := []byte(GetEnv("KEY"))
-	iv := []byte(GetEnv("IV"))
+	key := []byte(secretKeyParam)
+	iv := []byte(ivParam)
 
 	// Use padding function
 	bplainfile := PKCS5Padding(plainfile, aes.BlockSize)
@@ -113,15 +113,15 @@ func EncryptAESFile(plainfile []byte) ([]byte, error) {
 	return cipherfile, nil
 }
 
-func DecryptAESFile(cipherfile []byte) ([]byte, error) {
+func DecryptAESFile(cipherfile []byte, secretKeyParam string, ivParam string) ([]byte, error) {
 
 	elapsedTime := timer("AES-Decrypt")
 	defer elapsedTime()
 	time.Sleep(1 * time.Second)
 
 	// Retrieve the key and iv
-	key := []byte(GetEnv("KEY"))
-	iv := []byte(GetEnv("IV"))
+	key := []byte(secretKeyParam)
+	iv := []byte(ivParam)
 
 	// Decode the base64 cipherfile
 

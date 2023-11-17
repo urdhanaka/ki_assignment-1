@@ -10,13 +10,13 @@ import (
 // RC4 is cryptographically broken and should not be used for secure
 // applications.
 
-func EncryptRC4(data []byte) (string, error) {
+func EncryptRC4(data []byte, secretKeyParam string, ivParam string) (string, error) {
 
 	elapsedTime := timer("RC4-Encrypt")
 	defer elapsedTime()
 	time.Sleep(1 * time.Second)
-	
-	key := []byte(GetEnv("KEY"))
+
+	key := []byte(secretKeyParam)
 
 	c, err := rc4.NewCipher(key)
 	if err != nil {
@@ -30,13 +30,13 @@ func EncryptRC4(data []byte) (string, error) {
 	return res, nil
 }
 
-func DecryptRC4(encrypted string) (string, error) {
-	
+func DecryptRC4(encrypted string, secretKeyParam string, ivParam string) (string, error) {
+
 	elapsedTime := timer("RC4-Decrypt")
 	defer elapsedTime()
 	time.Sleep(1 * time.Second)
-	
-	key := []byte(GetEnv("KEY"))
+
+	key := []byte(secretKeyParam)
 
 	cipher, err := rc4.NewCipher(key)
 	if err != nil {

@@ -26,7 +26,7 @@ func main() {
 		fileRepository repository.FileRepository = repository.NewFileRepository(db)
 
 		userService service.UserService = service.NewUserService(userRepository)
-		fileService service.FileService = service.NewFileService(fileRepository)
+		fileService service.FileService = service.NewFileService(fileRepository, userRepository)
 
 		userController controllers.UserController = controllers.NewUserController(userService)
 		fileController controllers.FileController = controllers.NewFileController(fileService)

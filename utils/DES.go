@@ -7,14 +7,14 @@ import (
 	"time"
 )
 
-func EncryptDES(plaintext []byte) (string, error) {
+func EncryptDES(plaintext []byte, secretKeyParam string, ivParam string) (string, error) {
 
 	elapsedTime := timer("DES-Encrypt")
 	defer elapsedTime()
 	time.Sleep(1 * time.Second)
 
-	key := []byte(GetEnv("KEY8"))
-	iv := []byte(GetEnv("IV8"))
+	key := []byte(secretKeyParam)
+	iv := []byte(ivParam)
 
 	// Make new DES cipher key
 	block, err := des.NewCipher(key)
@@ -33,14 +33,14 @@ func EncryptDES(plaintext []byte) (string, error) {
 	return res, nil
 }
 
-func DecryptDES(ciphertext string) (string, error) {
+func DecryptDES(ciphertext string, secretKeyParam string, ivParam string) (string, error) {
 
 	elapsedTime := timer("DES-Decrypt")
 	defer elapsedTime()
 	time.Sleep(1 * time.Second)
-	
-	key := []byte(GetEnv("KEY8"))
-	iv := []byte(GetEnv("IV8"))
+
+	key := []byte(secretKeyParam)
+	iv := []byte(ivParam)
 
 	ciphertextDecoded, err := base64.StdEncoding.DecodeString(ciphertext)
 	if err != nil {

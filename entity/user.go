@@ -33,12 +33,18 @@ type (
 		Password_RC4 string `json:"password_rc4" binding:"required"`
 		Password_DEC string `json:"password_dec" binding:"required"`
 	}
+
+	Key struct {
+		SecretKey string `json:"secret" binding:"required"`
+		IV				string `json:"iv" binding:"required"`
+	}
 )
 
 type User struct {
 	ID uuid.UUID `gorm:"primary_key;not_null;type:char(36)" json:"id"`
 	Identity
 	Credential
+	Key
 
 	// user has many files
 	Files []Files `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" binding:"required" json:"files"`
@@ -52,83 +58,83 @@ func (User) TableName() string {
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
 	// Done
-	if enc, err := utils.EncryptAES([]byte(u.Username_AES)); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.Username_AES), u.SecretKey, u.IV); err == nil {
 		u.Username_AES = string(enc)
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4)); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4), u.SecretKey, u.IV); err == nil {
 		u.Username_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Username_DEC)); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Username_DEC), u.SecretKey, u.IV); err == nil {
 		u.Username_DEC = string(enc)
 	}
 
 	// Done
-	if enc, err := utils.EncryptAES([]byte(u.Password_AES)); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.Password_AES), u.SecretKey, u.IV); err == nil {
 		u.Password_AES = string(enc)
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4)); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4), u.SecretKey, u.IV); err == nil {
 		u.Password_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Password_DEC)); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Password_DEC), u.SecretKey, u.IV); err == nil {
 		u.Password_DEC = string(enc)
 	}
 
 	// Identity
 	// Name
-	if enc, err := utils.EncryptAES([]byte(u.Name_AES)); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.Name_AES), u.SecretKey, u.IV); err == nil {
 		u.Name_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Name_DEC)); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Name_DEC), u.SecretKey, u.IV); err == nil {
 		u.Name_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.Name_RC4)); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Name_RC4), u.SecretKey, u.IV); err == nil {
 		u.Name_RC4 = string(enc)
 	}
 
 	// Number
-	if enc, err := utils.EncryptAES([]byte(u.Number_AES)); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.Number_AES), u.SecretKey, u.IV); err == nil {
 		u.Number_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Number_DEC)); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Number_DEC), u.SecretKey, u.IV); err == nil {
 		u.Number_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.Number_RC4)); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Number_RC4), u.SecretKey, u.IV); err == nil {
 		u.Number_RC4 = string(enc)
 	}
 
 	// CV
-	if enc, err := utils.EncryptAES([]byte(u.CV_AES)); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.CV_AES), u.SecretKey, u.IV); err == nil {
 		u.CV_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.CV_DEC)); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.CV_DEC), u.SecretKey, u.IV); err == nil {
 		u.CV_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.CV_RC4)); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.CV_RC4), u.SecretKey, u.IV); err == nil {
 		u.CV_RC4 = string(enc)
 	}
 
 	// ID_Card
-	if enc, err := utils.EncryptAES([]byte(u.ID_Card_AES)); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.ID_Card_AES), u.SecretKey, u.IV); err == nil {
 		u.ID_Card_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.ID_Card_DEC)); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.ID_Card_DEC), u.SecretKey, u.IV); err == nil {
 		u.ID_Card_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.ID_Card_RC4)); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.ID_Card_RC4), u.SecretKey, u.IV); err == nil {
 		u.ID_Card_RC4 = string(enc)
 	}
 
@@ -137,83 +143,83 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 
 func (u *User) BeforeUpdate(tx *gorm.DB) error {
 	// Done
-	if enc, err := utils.EncryptAES([]byte(u.Username_AES)); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.Username_AES), u.SecretKey, u.IV); err == nil {
 		u.Username_AES = string(enc)
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4)); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4), u.SecretKey, u.IV); err == nil {
 		u.Username_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Username_DEC)); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Username_DEC), u.SecretKey, u.IV); err == nil {
 		u.Username_DEC = string(enc)
 	}
 
 	// Done
-	if enc, err := utils.EncryptAES([]byte(u.Password_AES)); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.Password_AES), u.SecretKey, u.IV); err == nil {
 		u.Password_AES = string(enc)
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4)); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4), u.SecretKey, u.IV); err == nil {
 		u.Password_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Password_DEC)); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Password_DEC), u.SecretKey, u.IV); err == nil {
 		u.Password_DEC = string(enc)
 	}
 
 	// Identity
 	// Name
-	if enc, err := utils.EncryptAES([]byte(u.Name_AES)); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.Name_AES), u.SecretKey, u.IV); err == nil {
 		u.Name_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Name_DEC)); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Name_DEC), u.SecretKey, u.IV); err == nil {
 		u.Name_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.Name_RC4)); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Name_RC4), u.SecretKey, u.IV); err == nil {
 		u.Name_RC4 = string(enc)
 	}
 
 	// Number
-	if enc, err := utils.EncryptAES([]byte(u.Number_AES)); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.Number_AES), u.SecretKey, u.IV); err == nil {
 		u.Number_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Number_DEC)); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Number_DEC), u.SecretKey, u.IV); err == nil {
 		u.Number_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.Number_RC4)); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Number_RC4), u.SecretKey, u.IV); err == nil {
 		u.Number_RC4 = string(enc)
 	}
 
 	// CV
-	if enc, err := utils.EncryptAES([]byte(u.CV_AES)); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.CV_AES), u.SecretKey, u.IV); err == nil {
 		u.CV_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.CV_DEC)); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.CV_DEC), u.SecretKey, u.IV); err == nil {
 		u.CV_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.CV_RC4)); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.CV_RC4), u.SecretKey, u.IV); err == nil {
 		u.CV_RC4 = string(enc)
 	}
 
 	// ID_Card
-	if enc, err := utils.EncryptAES([]byte(u.ID_Card_AES)); err == nil {
+	if enc, err := utils.EncryptAES([]byte(u.ID_Card_AES), u.SecretKey, u.IV); err == nil {
 		u.ID_Card_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.ID_Card_DEC)); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.ID_Card_DEC), u.SecretKey, u.IV); err == nil {
 		u.ID_Card_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.ID_Card_RC4)); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.ID_Card_RC4), u.SecretKey, u.IV); err == nil {
 		u.ID_Card_RC4 = string(enc)
 	}
 

@@ -66,6 +66,10 @@ func (u *userService) RegisterUser(ctx context.Context, userDTO dto.UserCreateDt
 	user.ID_Card_DEC = userDTO.ID_Card.Filename
 	user.ID_Card_RC4 = userDTO.ID_Card.Filename
 
+	// Generate Secret Key (Symmetric Key)
+	user.SecretKey = utils.GenerateSecretKey()
+	user.IV = utils.GenerateIV()
+
 	// Check file type
 	if userDTO.CV.Header.Get("Content-Type") != "application/pdf" && userDTO.CV.Header.Get("Content-Type") != "image/png" && userDTO.CV.Header.Get("Content-Type") != "image/jpeg" && userDTO.CV.Header.Get("Content-Type") != "image/jpg" {
 		return entity.User{}, errors.New("cv file type is not supported")
@@ -86,13 +90,13 @@ func (u *userService) RegisterUser(ctx context.Context, userDTO dto.UserCreateDt
 
 	// CV upload
 	cvFileName := fmt.Sprintf("%s/files/%s", user.ID, user.CV_ID)
-	if err := utils.UploadFileUtility(userDTO.CV, cvFileName); err != nil {
+	if err := utils.UploadFileUtility(userDTO.CV, cvFileName, user.SecretKey, user.IV); err != nil {
 		return entity.User{}, err
 	}
 
 	// ID Card upload
 	idCardFileName := fmt.Sprintf("%s/files/%s", user.ID, user.ID_Card_ID)
-	if err := utils.UploadFileUtility(userDTO.ID_Card, idCardFileName); err != nil {
+	if err := utils.UploadFileUtility(userDTO.ID_Card, idCardFileName, user.SecretKey, user.IV); err != nil {
 		return entity.User{}, err
 	}
 
@@ -186,32 +190,32 @@ func (u *userService) GetAllUserDecrypted(ctx context.Context) ([]entity.User, e
 	}
 
 	for i := range users {
-		decryptedUsernameAES, err := utils.DecryptAES(users[i].Username_AES)
+		decryptedUsernameAES, err := utils.DecryptAES(users[i].Username_AES, users[i].SecretKey, users[i].IV)
 		if err == nil {
 			users[i].Username_AES = decryptedUsernameAES
 		}
 
-		decryptedPasswordAES, err := utils.DecryptAES(users[i].Password_AES)
+		decryptedPasswordAES, err := utils.DecryptAES(users[i].Password_AES, users[i].SecretKey, users[i].IV)
 		if err == nil {
 			users[i].Password_AES = decryptedPasswordAES
 		}
 
-		decryptedUsernameDES, err := utils.DecryptDES(users[i].Username_DEC)
+		decryptedUsernameDES, err := utils.DecryptDES(users[i].Username_DEC, users[i].SecretKey, users[i].IV)
 		if err == nil {
 			users[i].Username_DEC = decryptedUsernameDES
 		}
 
-		decryptedPasswordDES, err := utils.DecryptDES(users[i].Password_DEC)
+		decryptedPasswordDES, err := utils.DecryptDES(users[i].Password_DEC, users[i].SecretKey, users[i].IV)
 		if err == nil {
 			users[i].Password_DEC = decryptedPasswordDES
 		}
 
-		decryptedUsernameRC4, err := utils.DecryptRC4(users[i].Username_RC4)
+		decryptedUsernameRC4, err := utils.DecryptRC4(users[i].Username_RC4, users[i].SecretKey, users[i].IV)
 		if err == nil {
 			users[i].Username_RC4 = decryptedUsernameRC4
 		}
 
-		decryptedPasswordRC4, err := utils.DecryptRC4(users[i].Password_RC4)
+		decryptedPasswordRC4, err := utils.DecryptRC4(users[i].Password_RC4, users[i].SecretKey, users[i].IV)
 		if err == nil {
 			users[i].Password_RC4 = decryptedPasswordRC4
 		}
@@ -227,63 +231,63 @@ func (u *userService) GetUserByIDDecrypted(ctx context.Context, userID string) (
 	}
 
 	// Credential
-	decryptedUsernameAES, err := utils.DecryptAES(user.Username_AES)
+	decryptedUsernameAES, err := utils.DecryptAES(user.Username_AES, user.SecretKey, user.IV)
 	if err == nil {
 		user.Username_AES = decryptedUsernameAES
 	}
 
-	decryptedPasswordAES, err := utils.DecryptAES(user.Password_AES)
+	decryptedPasswordAES, err := utils.DecryptAES(user.Password_AES, user.SecretKey, user.IV)
 	if err == nil {
 		user.Password_AES = decryptedPasswordAES
 	}
 
-	decryptedUsernameDES, err := utils.DecryptDES(user.Username_DEC)
+	decryptedUsernameDES, err := utils.DecryptDES(user.Username_DEC, user.SecretKey, user.IV)
 	if err == nil {
 		user.Username_DEC = decryptedUsernameDES
 	}
 
-	decryptedPasswordDES, err := utils.DecryptDES(user.Password_DEC)
+	decryptedPasswordDES, err := utils.DecryptDES(user.Password_DEC, user.SecretKey, user.IV)
 	if err == nil {
 		user.Password_DEC = decryptedPasswordDES
 	}
 
-	decryptedUsernameRC4, err := utils.DecryptRC4(user.Username_RC4)
+	decryptedUsernameRC4, err := utils.DecryptRC4(user.Username_RC4, user.SecretKey, user.IV)
 	if err == nil {
 		user.Username_RC4 = decryptedUsernameRC4
 	}
 
-	decryptedPasswordRC4, err := utils.DecryptRC4(user.Password_RC4)
+	decryptedPasswordRC4, err := utils.DecryptRC4(user.Password_RC4, user.SecretKey, user.IV)
 	if err == nil {
 		user.Password_RC4 = decryptedPasswordRC4
 	}
 
 	// Identity
-	decryptedNameAES, err := utils.DecryptAES(user.Name_AES)
+	decryptedNameAES, err := utils.DecryptAES(user.Name_AES, user.SecretKey, user.IV)
 	if err == nil {
 		user.Name_AES = decryptedNameAES
 	}
 
-	decryptedNameDES, err := utils.DecryptDES(user.Name_DEC)
+	decryptedNameDES, err := utils.DecryptDES(user.Name_DEC, user.SecretKey, user.IV)
 	if err == nil {
 		user.Name_DEC = decryptedNameDES
 	}
 
-	decryptedNameRC4, err := utils.DecryptRC4(user.Name_RC4)
+	decryptedNameRC4, err := utils.DecryptRC4(user.Name_RC4, user.SecretKey, user.IV)
 	if err == nil {
 		user.Name_RC4 = decryptedNameRC4
 	}
 
-	decryptedNumberAES, err := utils.DecryptAES(user.Number_AES)
+	decryptedNumberAES, err := utils.DecryptAES(user.Number_AES, user.SecretKey, user.IV)
 	if err == nil {
 		user.Number_AES = decryptedNumberAES
 	}
 
-	decryptedNumberDES, err := utils.DecryptDES(user.Number_DEC)
+	decryptedNumberDES, err := utils.DecryptDES(user.Number_DEC, user.SecretKey, user.IV)
 	if err == nil {
 		user.Number_DEC = decryptedNumberDES
 	}
 
-	decryptedNumberRC4, err := utils.DecryptRC4(user.Number_RC4)
+	decryptedNumberRC4, err := utils.DecryptRC4(user.Number_RC4, user.SecretKey, user.IV)
 	if err == nil {
 		user.Number_RC4 = decryptedNumberRC4
 	}

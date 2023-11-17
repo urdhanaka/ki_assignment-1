@@ -16,28 +16,39 @@ type FileService interface {
 	UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error)
 	GetAllFiles(ctx context.Context) ([]entity.Files, error)
 	GetFilePath(ctx context.Context, filename string) (string, error)
-	GetFile(ctx context.Context, filePath string) (string, error)
+	GetFile(ctx context.Context, filePath string, username string) (string, error)
 	GetFileByUserID(ctx context.Context, userID string) ([]entity.Files, error)
 }
 
 type fileService struct {
 	FileRepository repository.FileRepository
+	UserRepository repository.UserRepository
 }
 
-func NewFileService(fileRepo repository.FileRepository) FileService {
+func NewFileService(fileRepo repository.FileRepository, userRepo repository.UserRepository) FileService {
 	return &fileService{
 		FileRepository: fileRepo,
+		UserRepository: userRepo,
 	}
 }
 
 func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error) {
 	var file entity.Files
 
+	user, err := f.UserRepository.GetUserByID(ctx, fileDTO.UserID)
+	if err != nil {
+		return entity.Files{}, err
+	}
+
+	Files_AES, err := utils.EncryptAES([]byte(fileDTO.Files.Filename), user.SecretKey, user.IV)
+	Files_RC4, err := utils.EncryptAES([]byte(fileDTO.Files.Filename), user.SecretKey, user.IV)
+	Files_DES, err := utils.EncryptAES([]byte(fileDTO.Files.Filename), user.SecretKey, user.IV)
+
 	file.ID = uuid.New()
 	file.Name = fileDTO.Name
-	file.Files_AES = fileDTO.Files.Filename
-	file.Files_RC4 = fileDTO.Files.Filename
-	file.Files_DEC = fileDTO.Files.Filename
+	file.Files_AES = Files_AES
+	file.Files_RC4 = Files_RC4
+	file.Files_DEC = Files_DES
 	file.UserID, _ = uuid.Parse(fileDTO.UserID)
 
 	// Check file type
@@ -57,7 +68,7 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 
 	// Save the files to the uploads folder
 	fileName := fmt.Sprintf("%s/files/%s", file.UserID, file.ID)
-	if err := utils.UploadFileUtility(fileDTO.Files, fileName); err != nil {
+	if err := utils.UploadFileUtility(fileDTO.Files, fileName, user.SecretKey, user.IV); err != nil {
 		return entity.Files{}, err
 	}
 
@@ -79,8 +90,17 @@ func (f *fileService) GetAllFiles(ctx context.Context) ([]entity.Files, error) {
 }
 
 func (f *fileService) GetFilePath(ctx context.Context, filename string) (string, error) {
+	userID, err := f.FileRepository.GetUserIDfromFilename(ctx, filename)
+	if err != nil {
+		return filename, err
+	}
 
-	encryptedFilenameAES, err := utils.EncryptAES([]byte(filename))
+	user, err := f.UserRepository.GetUserByID(ctx, userID)
+	if err != nil {
+		return "", err
+	}
+
+	encryptedFilenameAES, err := utils.EncryptAES([]byte(filename), user.SecretKey, user.IV)
 	if err == nil {
 		filename = string(encryptedFilenameAES)
 	}
@@ -90,19 +110,16 @@ func (f *fileService) GetFilePath(ctx context.Context, filename string) (string,
 		return filename, err
 	}
 
-	userID, err := f.FileRepository.GetUserIDfromFilename(ctx, filename)
-	if err != nil {
-		return filename, err
-	}
 
 	result := fmt.Sprintf("uploads/%s/files/%s", userID, fileID)
-	
+
 	return result, nil
 }
 
 // Get File from repository
-func (f *fileService) GetFile(ctx context.Context, filePath string) (string, error) {
-	res, err := utils.GetFileUtility(filePath)
+func (f *fileService) GetFile(ctx context.Context, filePath string, username string) (string, error) {
+	user, err := f.UserRepository.GetUserByUsername(username)
+	res, err := utils.GetFileUtility(filePath, user.SecretKey, user.IV)
 	if err != nil {
 		return "", err
 	}
