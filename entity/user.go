@@ -35,8 +35,10 @@ type (
 	}
 
 	Key struct {
-		SecretKey string `json:"secret" binding:"required"`
-		IV				string `json:"iv" binding:"required"`
+		SecretKey      []byte `json:"secret" binding:"required"`
+		IV             []byte `json:"iv" binding:"required"`
+		SecretKey8Byte []byte `json:"secret_key_8_byte" binding:"required"`
+		IV8Byte        []byte `json:"iv_8_byte" binding:"required"`
 	}
 )
 
@@ -67,7 +69,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.Username_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Username_DEC), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Username_DEC), u.SecretKey8Byte, u.IV8Byte); err == nil {
 		u.Username_DEC = string(enc)
 	}
 
@@ -81,7 +83,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.Password_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Password_DEC), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Password_DEC), u.SecretKey8Byte, u.IV8Byte); err == nil {
 		u.Password_DEC = string(enc)
 	}
 
@@ -91,7 +93,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.Name_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Name_DEC), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Name_DEC), u.SecretKey8Byte, u.IV8Byte); err == nil {
 		u.Name_DEC = string(enc)
 	}
 
@@ -104,7 +106,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.Number_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Number_DEC), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Number_DEC), u.SecretKey8Byte, u.IV8Byte); err == nil {
 		u.Number_DEC = string(enc)
 	}
 
@@ -117,7 +119,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.CV_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.CV_DEC), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.CV_DEC), u.SecretKey8Byte, u.IV8Byte); err == nil {
 		u.CV_DEC = string(enc)
 	}
 
@@ -130,7 +132,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.ID_Card_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.ID_Card_DEC), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.ID_Card_DEC), u.SecretKey8Byte, u.IV8Byte); err == nil {
 		u.ID_Card_DEC = string(enc)
 	}
 
@@ -152,7 +154,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		u.Username_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Username_DEC), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Username_DEC), u.SecretKey8Byte, u.IV8Byte); err == nil {
 		u.Username_DEC = string(enc)
 	}
 
@@ -166,7 +168,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		u.Password_RC4 = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Password_DEC), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Password_DEC), u.SecretKey8Byte, u.IV8Byte); err == nil {
 		u.Password_DEC = string(enc)
 	}
 
@@ -176,7 +178,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		u.Name_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Name_DEC), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Name_DEC), u.SecretKey8Byte, u.IV8Byte); err == nil {
 		u.Name_DEC = string(enc)
 	}
 
@@ -189,7 +191,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		u.Number_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.Number_DEC), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.Number_DEC), u.SecretKey8Byte, u.IV8Byte); err == nil {
 		u.Number_DEC = string(enc)
 	}
 
@@ -202,7 +204,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		u.CV_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.CV_DEC), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.CV_DEC), u.SecretKey8Byte, u.IV8Byte); err == nil {
 		u.CV_DEC = string(enc)
 	}
 
@@ -215,7 +217,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		u.ID_Card_AES = string(enc)
 	}
 
-	if enc, err := utils.EncryptDES([]byte(u.ID_Card_DEC), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptDES([]byte(u.ID_Card_DEC), u.SecretKey8Byte, u.IV8Byte); err == nil {
 		u.ID_Card_DEC = string(enc)
 	}
 

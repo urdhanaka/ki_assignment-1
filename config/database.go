@@ -2,11 +2,11 @@ package config
 
 import (
 	"fmt"
-	"ki_assignment-1/entity"
-	"os"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"ki_assignment-1/entity"
+	"os"
 )
 
 func SetupDatabaseConnection() *gorm.DB {

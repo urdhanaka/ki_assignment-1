@@ -110,7 +110,6 @@ func (f *fileService) GetFilePath(ctx context.Context, filename string) (string,
 		return filename, err
 	}
 
-
 	result := fmt.Sprintf("uploads/%s/files/%s", userID, fileID)
 
 	return result, nil

@@ -2,33 +2,32 @@ package utils
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 )
 
-func GenerateSecretKey() string {
+func GenerateSecretKey() []byte {
 	// Generate Secret Key
 	secret := make([]byte, 32)
 	rand.Read(secret)
-	return base64.StdEncoding.EncodeToString(secret)
+	return secret
 }
 
-func Generate8ByteSecretKey() string {
+func GenerateSecretKey8Byte() []byte {
 	// Generate Secret Key
 	secret := make([]byte, 8)
 	rand.Read(secret)
-	return base64.StdEncoding.EncodeToString(secret)
+	return secret
 }
 
-func GenerateIV() string {
+func GenerateIV() []byte {
 	// Generate IV
 	iv := make([]byte, 16)
 	rand.Read(iv)
-	return base64.StdEncoding.EncodeToString(iv)
+	return iv
 }
 
-func Generate8Byte() string {
+func Generate8Byte() []byte {
 	// Generate 8 Byte IV
 	iv := make([]byte, 8)
 	rand.Read(iv)
-	return base64.StdEncoding.EncodeToString(iv)
+	return iv
 }

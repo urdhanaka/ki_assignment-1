@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func UploadFileUtility(file *multipart.FileHeader, path string, secretKeyParam string, ivParam string) error {
+func UploadFileUtility(file *multipart.FileHeader, path string, secretKeyParam []byte, ivParam []byte) error {
 	parts := strings.Split(path, "/")
 
 	fileId := parts[2]
@@ -46,7 +46,7 @@ func UploadFileUtility(file *multipart.FileHeader, path string, secretKeyParam s
 	return nil
 }
 
-func GetFileUtility(path string, secretKeyParam string, ivParam string) (string, error) {
+func GetFileUtility(path string, secretKeyParam []byte, ivParam []byte) (string, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return "path", err

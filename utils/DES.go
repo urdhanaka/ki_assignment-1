@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func EncryptDES(plaintext []byte, secretKeyParam string, ivParam string) (string, error) {
+func EncryptDES(plaintext []byte, secretKeyParam []byte, ivParam []byte) (string, error) {
 
 	elapsedTime := timer("DES-Encrypt")
 	defer elapsedTime()
@@ -33,7 +33,7 @@ func EncryptDES(plaintext []byte, secretKeyParam string, ivParam string) (string
 	return res, nil
 }
 
-func DecryptDES(ciphertext string, secretKeyParam string, ivParam string) (string, error) {
+func DecryptDES(ciphertext string, secretKeyParam []byte, ivParam []byte) (string, error) {
 
 	elapsedTime := timer("DES-Decrypt")
 	defer elapsedTime()
