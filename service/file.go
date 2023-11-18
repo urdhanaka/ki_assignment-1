@@ -41,8 +41,17 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 	}
 
 	Files_AES, err := utils.EncryptAES([]byte(fileDTO.Files.Filename), user.SecretKey, user.IV)
+	if err != nil {
+		return entity.Files{}, err
+	}
 	Files_RC4, err := utils.EncryptAES([]byte(fileDTO.Files.Filename), user.SecretKey, user.IV)
+	if err != nil {
+		return entity.Files{}, err
+	}
 	Files_DES, err := utils.EncryptAES([]byte(fileDTO.Files.Filename), user.SecretKey, user.IV)
+	if err != nil {
+		return entity.Files{}, err
+	}
 
 	file.ID = uuid.New()
 	file.Name = fileDTO.Name
@@ -118,6 +127,9 @@ func (f *fileService) GetFilePath(ctx context.Context, filename string) (string,
 // Get File from repository
 func (f *fileService) GetFile(ctx context.Context, filePath string, username string) (string, error) {
 	user, err := f.UserRepository.GetUserByUsername(username)
+	if err != nil {
+		return "", err
+	}
 	res, err := utils.GetFileUtility(filePath, user.SecretKey, user.IV)
 	if err != nil {
 		return "", err
