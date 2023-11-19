@@ -2,11 +2,12 @@ package config
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"ki_assignment-1/entity"
-	"os"
 )
 
 func SetupDatabaseConnection() *gorm.DB {
@@ -28,6 +29,7 @@ func SetupDatabaseConnection() *gorm.DB {
 	if err := db.AutoMigrate(
 		&entity.User{},
 		&entity.Files{},
+		&entity.AllowedUser{},
 	); err != nil {
 		fmt.Println(err)
 		panic(err)
@@ -43,5 +45,4 @@ func CloseDatabaseConnection(db *gorm.DB) {
 		panic(err)
 	}
 	dbSQL.Close()
-
 }

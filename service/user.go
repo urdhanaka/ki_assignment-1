@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"ki_assignment-1/dto"
 	"ki_assignment-1/entity"
 	"ki_assignment-1/repository"
@@ -21,6 +22,7 @@ type UserService interface {
 	DeleteUser(ctx context.Context, userID string) error
 	GetAllUserDecrypted(ctx context.Context) ([]entity.User, error)
 	GetUserByIDDecrypted(ctx context.Context, userID string) (entity.User, error)
+	GetUserPublicKeyByID(ctx context.Context, userID string) (string, error)
 }
 
 type userService struct {
@@ -102,6 +104,11 @@ func (u *userService) RegisterUser(ctx context.Context, userDTO dto.UserCreateDt
 		return entity.User{}, err
 	}
 
+	err := utils.GenerateAsymmetricKeys(user.ID)
+	if err != nil {
+		return entity.User{}, nil
+	}
+
 	result, err := u.UserRepository.RegisterUser(ctx, user)
 	if err != nil {
 		return entity.User{}, err
@@ -163,7 +170,6 @@ func (u *userService) IdentityUpdateUser(ctx context.Context, userDto dto.UserId
 	}
 
 	return result, nil
-
 }
 
 func (u *userService) CredentialUpdateUser(ctx context.Context, userDTO dto.UserCredentialUpdateDto) (entity.User, error) {
@@ -361,4 +367,13 @@ func (u *userService) GetUserByIDDecrypted(ctx context.Context, userID string) (
 	}
 
 	return user, nil
+}
+
+func (u *userService) GetUserPublicKeyByID(ctx context.Context, userID string) (string, error) {
+	res, err := utils.GetPublicKey(userID)
+	if err != nil {
+		return "", err
+	}
+
+	return res, nil
 }

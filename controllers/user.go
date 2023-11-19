@@ -1,9 +1,10 @@
 package controllers
 
 import (
+	"net/http"
+
 	"ki_assignment-1/dto"
 	"ki_assignment-1/service"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +18,7 @@ type UserController interface {
 	DeleteUser(c *gin.Context)
 	GetAllUserDecrypted(c *gin.Context)
 	GetUserByIDDecrypted(c *gin.Context)
+	GetUserPublicKeyByID(c *gin.Context)
 }
 
 type userController struct {
@@ -134,4 +136,16 @@ func (u *userController) GetUserByIDDecrypted(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
+}
+
+func (u *userController) GetUserPublicKeyByID(c *gin.Context) {
+	userID := c.Param("id")
+
+	publicKey, err := u.UserService.GetUserPublicKeyByID(c, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, publicKey)
 }

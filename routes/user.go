@@ -17,5 +17,6 @@ func UserRoutes(router *gin.Engine, UserController controllers.UserController) {
 		user.DELETE("/delete/:id", UserController.DeleteUser)
 		user.GET("/decrypted/all", UserController.GetAllUserDecrypted)
 		user.GET("/decrypted/:id", UserController.GetUserByIDDecrypted)
+		user.GET("/public/:id", UserController.GetUserPublicKeyByID)
 	}
 }
