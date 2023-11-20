@@ -30,7 +30,7 @@ func main() {
 		userService service.UserService = service.NewUserService(userRepository)
 		fileService service.FileService = service.NewFileService(fileRepository, userRepository)
 
-		userController controllers.UserController = controllers.NewUserController(userService)
+		userController controllers.UserController = controllers.NewUserController(userService, jwtService)
 		fileController controllers.FileController = controllers.NewFileController(fileService)
 	)
 

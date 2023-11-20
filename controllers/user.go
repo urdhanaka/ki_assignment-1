@@ -28,9 +28,10 @@ type userController struct {
 	jwtService  service.JWTService
 }
 
-func NewUserController(userService service.UserService) UserController {
+func NewUserController(userService service.UserService, jwtService service.JWTService) UserController {
 	return &userController{
 		UserService: userService,
+		jwtService: jwtService,
 	}
 }
 
@@ -70,8 +71,6 @@ func (u *userController) LoginUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	fmt.Println(user.ID, user.Name_AES, user.Username_AES, user.Password_AES)
 
 	token := u.jwtService.GenerateToken(user.ID)
 
@@ -175,9 +174,15 @@ func (u *userController) GetUserByIDDecrypted(c *gin.Context) {
 }
 
 func (u *userController) GetUserPublicKeyByUsername(c *gin.Context) {
-	username := c.Param("username")
+	token := c.MustGet("token").(string)
+	fmt.Println(token)
+	userID, err := u.jwtService.FindUserIDByToken(token)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	publicKey, err := u.UserService.GetUserPublicKeyByID(c, username)
+	publicKey, err := u.UserService.GetUserPublicKeyByID(c, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

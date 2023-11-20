@@ -1,7 +1,7 @@
 package service
 
 import (
-	"fmt"
+	"crypto/rand"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -32,34 +32,24 @@ func NewJWTService() JWTService {
 }
 
 func getSecretKey() string {
-	// JWTsecretKey := make([]byte, 32)
-	// if _, err := rand.Read(JWTsecretKey); err != nil {
-	// 	panic(err)
-	// }
-
-	return "Template"
-	// return string(JWTsecretKey)
+	JWTsecretKey := make([]byte, 32)
+	if _, err := rand.Read(JWTsecretKey); err != nil {
+		panic(err)
+	}
+	return string(JWTsecretKey)
 }
 
-func (j *jwtService) GenerateToken(userID uuid.UUID) (string) {
-	claims := jwtCustomClaim{
+func (j *jwtService) GenerateToken(userID uuid.UUID) string {
+	claims := &jwtCustomClaim{
 		userID,
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 30)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
 			Issuer:    j.issuer,
 		},
 	}
 
-	fmt.Println(claims)
-
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	fmt.Println(token)
-
 	t, err := token.SignedString([]byte(j.secretKey))
-
-	fmt.Println(t)
-
 	if err != nil {
 		panic(err)
 	}
