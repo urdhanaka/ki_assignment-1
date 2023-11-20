@@ -21,5 +21,6 @@ func UserRoutes(router *gin.Engine, UserController controllers.UserController, j
 		user.GET("/decrypted/all", middleware.Authenticate(jwtService), UserController.GetAllUserDecrypted)
 		user.GET("/decrypted/:id", middleware.Authenticate(jwtService), UserController.GetUserByIDDecrypted)
 		user.GET("/public", middleware.Authenticate(jwtService), UserController.GetUserPublicKeyByUsername)
+		user.GET("/private", middleware.Authenticate(jwtService), UserController.GetUserPrivateKeyByUsername)
 	}
 }

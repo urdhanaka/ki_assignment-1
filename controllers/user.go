@@ -21,6 +21,7 @@ type UserController interface {
 	GetAllUserDecrypted(c *gin.Context)
 	GetUserByIDDecrypted(c *gin.Context)
 	GetUserPublicKeyByUsername(c *gin.Context)
+	GetUserPrivateKeyByUsername(c *gin.Context)
 }
 
 type userController struct {
@@ -31,7 +32,7 @@ type userController struct {
 func NewUserController(userService service.UserService, jwtService service.JWTService) UserController {
 	return &userController{
 		UserService: userService,
-		jwtService: jwtService,
+		jwtService:  jwtService,
 	}
 }
 
@@ -189,4 +190,14 @@ func (u *userController) GetUserPublicKeyByUsername(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, publicKey)
+}
+
+func (u *userController) GetUserPrivateKeyByUsername(c *gin.Context) {
+	token := c.MustGet("token").(string)
+
+	_, err := u.jwtService.FindUserIDByToken(token)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 }

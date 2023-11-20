@@ -24,6 +24,7 @@ type UserService interface {
 	GetAllUserDecrypted(ctx context.Context) ([]entity.User, error)
 	GetUserByIDDecrypted(ctx context.Context, userID string) (entity.User, error)
 	GetUserPublicKeyByID(ctx context.Context, id uuid.UUID) (string, error)
+	GetUserPrivateKeyByID(ctx context.Context, id uuid.UUID) (string, error)
 	GetUserByUsername(ctx context.Context, username string) (entity.User, error)
 }
 
@@ -397,6 +398,20 @@ func (u *userService) GetUserPublicKeyByID(ctx context.Context, id uuid.UUID) (s
 	}
 
 	res, err := utils.GetPublicKey(user.ID)
+	if err != nil {
+		return "", err
+	}
+
+	return res, nil
+}
+
+func (u *userService) GetUserPrivateKeyByID(ctx context.Context, id uuid.UUID) (string, error) {
+	user, err := u.UserRepository.GetUserByID(ctx, id.String())
+	if err != nil {
+		return "", err
+	}
+
+	res, err := utils.GetPrivateKey(user.ID)
 	if err != nil {
 		return "", err
 	}

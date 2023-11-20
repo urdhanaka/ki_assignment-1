@@ -23,3 +23,18 @@ func GetPublicKey(id uuid.UUID) (string, error) {
 
 	return res, nil
 }
+
+func GetPrivateKey(id uuid.UUID) (string, error) {
+	userPrivateKeyFilename := fmt.Sprintf("keys/private-keys/%s.pem", id)
+
+	privateKeyPem, err := os.ReadFile(userPrivateKeyFilename)
+	if err != nil {
+		return "", nil
+	}
+
+	privateKeyBlock, _ := pem.Decode(privateKeyPem)
+
+	res := base64.StdEncoding.EncodeToString(privateKeyBlock.Bytes)
+
+	return res, nil
+}

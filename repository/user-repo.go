@@ -3,9 +3,8 @@ package repository
 import (
 	"context"
 
-	"ki_assignment-1/entity"
-
 	"gorm.io/gorm"
+	"ki_assignment-1/entity"
 )
 
 type UserConnection struct {
