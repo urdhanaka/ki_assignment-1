@@ -15,7 +15,7 @@ import (
 
 type UserService interface {
 	RegisterUser(ctx context.Context, userDTO dto.UserCreateDto) (entity.User, error)
-	VerifyUser(ctx context.Context, userDTO dto.UserLoginDto) (entity.User, error)
+	VerifyUser(ctx context.Context, userDTO dto.UserLoginDto) (bool, error)
 	GetAllUser(ctx context.Context) ([]entity.User, error)
 	GetUserByID(ctx context.Context, userID string) (entity.User, error)
 	CredentialUpdateUser(ctx context.Context, userDTO dto.UserCredentialUpdateDto) (entity.User, error)
@@ -24,6 +24,7 @@ type UserService interface {
 	GetAllUserDecrypted(ctx context.Context) ([]entity.User, error)
 	GetUserByIDDecrypted(ctx context.Context, userID string) (entity.User, error)
 	GetUserPublicKeyByID(ctx context.Context, userID string) (string, error)
+	GetUserByUsername(ctx context.Context, username string) (entity.User, error)
 }
 
 type userService struct {
@@ -119,22 +120,22 @@ func (u *userService) RegisterUser(ctx context.Context, userDTO dto.UserCreateDt
 	return result, nil
 }
 
-func (u *userService) VerifyUser(ctx context.Context, userDTO dto.UserLoginDto) (entity.User, error) {
+func (u *userService) VerifyUser(ctx context.Context, userDTO dto.UserLoginDto) (bool, error) {
 	user, err := u.UserRepository.GetUserByUsername(userDTO.Username)
 	if err != nil {
-		return entity.User{}, err
+		return false, err
 	}
 
-	encryptedPassword, err := utils.EncryptAES([]byte(userDTO.Password), []byte(user.Password_AES), []byte(user.IV))
+	encryptedPassword, err := utils.EncryptAES([]byte(userDTO.Password), []byte(user.SecretKey), []byte(user.IV))
 	if err != nil {
-		return entity.User{}, err
+		return false, err
 	}
 
 	if user.Password_AES != encryptedPassword {
-		return entity.User{}, errors.New("password is not valid")
+		return false, errors.New("password is not valid")
 	}
 
-	return user, nil
+	return true, nil
 }
 
 func (u *userService) GetAllUser(ctx context.Context) ([]entity.User, error) {
@@ -396,4 +397,13 @@ func (u *userService) GetUserPublicKeyByID(ctx context.Context, userID string) (
 	}
 
 	return res, nil
+}
+
+func (u *userService) GetUserByUsername(ctx context.Context, username string) (entity.User, error) {
+	result, err := u.UserRepository.GetUserByUsername(username)
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	return result, nil
 }

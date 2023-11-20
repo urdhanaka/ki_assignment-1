@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"ki_assignment-1/dto"
@@ -58,17 +59,21 @@ func (u *userController) LoginUser(c *gin.Context) {
 		return
 	}
 
-	verifyUser, err := u.UserService.VerifyUser(c, userDTO)
+	verifyUser, _ := u.UserService.VerifyUser(c.Request.Context(), userDTO)
+	if !verifyUser {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid username or password"})
+		return
+	}
+
+	user, err := u.UserService.GetUserByUsername(c.Request.Context(), userDTO.Username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	token, err := u.jwtService.GenerateToken(verifyUser.ID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+	fmt.Println(user.ID, user.Name_AES, user.Username_AES, user.Password_AES)
+
+	token := u.jwtService.GenerateToken(user.ID)
 
 	c.JSON(http.StatusOK, gin.H{
 		"token": token,

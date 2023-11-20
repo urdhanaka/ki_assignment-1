@@ -1,14 +1,15 @@
 package service
 
 import (
-	"crypto/rand"
+	"fmt"
+	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 )
 
 type JWTService interface {
-	GenerateToken(userID uuid.UUID) (string, error)
+	GenerateToken(userID uuid.UUID) (string)
 	ValidateToken(token string) (*jwt.Token, error)
 	FindUserIDByToken(token string) (uuid.UUID, error)
 }
@@ -18,30 +19,52 @@ type jwtService struct {
 	issuer    string
 }
 
+type jwtCustomClaim struct {
+	UserID uuid.UUID `json:"user_id"`
+	jwt.RegisteredClaims
+}
+
 func NewJWTService() JWTService {
 	return &jwtService{
 		secretKey: getSecretKey(),
-		issuer:    "go-rest-api",
+		issuer:    "Template",
 	}
 }
 
 func getSecretKey() string {
-	JWTsecretKey := make([]byte, 32)
-	if _, err := rand.Read(JWTsecretKey); err != nil {
+	// JWTsecretKey := make([]byte, 32)
+	// if _, err := rand.Read(JWTsecretKey); err != nil {
+	// 	panic(err)
+	// }
+
+	return "Template"
+	// return string(JWTsecretKey)
+}
+
+func (j *jwtService) GenerateToken(userID uuid.UUID) (string) {
+	claims := jwtCustomClaim{
+		userID,
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 30)),
+			Issuer:    j.issuer,
+		},
+	}
+
+	fmt.Println(claims)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	fmt.Println(token)
+
+	t, err := token.SignedString([]byte(j.secretKey))
+
+	fmt.Println(t)
+
+	if err != nil {
 		panic(err)
 	}
 
-	return string(JWTsecretKey)
-}
-
-func (j *jwtService) GenerateToken(userID uuid.UUID) (string, error) {
-	claims := jwt.MapClaims{}
-	claims["authorized"] = true
-	claims["user_id"] = userID
-	claims["issuer"] = j.issuer
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(j.secretKey))
+	return t
 }
 
 func (j *jwtService) ValidateToken(token string) (*jwt.Token, error) {
