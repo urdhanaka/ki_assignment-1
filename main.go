@@ -22,6 +22,8 @@ func main() {
 	var (
 		db *gorm.DB = config.SetupDatabaseConnection()
 
+		jwtService service.JWTService = service.NewJWTService()
+
 		userRepository repository.UserRepository = repository.NewUserRepository(db)
 		fileRepository repository.FileRepository = repository.NewFileRepository(db)
 
@@ -36,8 +38,8 @@ func main() {
 
 	router.Use(cors.Default())
 
-	routes.UserRoutes(router, userController)
-	routes.FileRoutes(router, fileController)
+	routes.UserRoutes(router, userController, jwtService)
+	routes.FileRoutes(router, fileController, jwtService)
 
 	router.Run()
 }

@@ -15,6 +15,7 @@ import (
 
 type UserService interface {
 	RegisterUser(ctx context.Context, userDTO dto.UserCreateDto) (entity.User, error)
+	VerifyUser(ctx context.Context, userDTO dto.UserLoginDto) (entity.User, error)
 	GetAllUser(ctx context.Context) ([]entity.User, error)
 	GetUserByID(ctx context.Context, userID string) (entity.User, error)
 	CredentialUpdateUser(ctx context.Context, userDTO dto.UserCredentialUpdateDto) (entity.User, error)
@@ -41,6 +42,7 @@ func (u *userService) RegisterUser(ctx context.Context, userDTO dto.UserCreateDt
 	user.ID = uuid.New()
 
 	// Credential
+	user.Username = userDTO.Username
 	user.Username_AES = userDTO.Username
 	user.Username_RC4 = userDTO.Username
 	user.Username_DEC = userDTO.Username
@@ -115,6 +117,24 @@ func (u *userService) RegisterUser(ctx context.Context, userDTO dto.UserCreateDt
 	}
 
 	return result, nil
+}
+
+func (u *userService) VerifyUser(ctx context.Context, userDTO dto.UserLoginDto) (entity.User, error) {
+	user, err := u.UserRepository.GetUserByUsername(userDTO.Username)
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	encryptedPassword, err := utils.EncryptAES([]byte(userDTO.Password), []byte(user.Password_AES), []byte(user.IV))
+	if err != nil {
+		return entity.User{}, err
+	}
+
+	if user.Password_AES != encryptedPassword {
+		return entity.User{}, errors.New("password is not valid")
+	}
+
+	return user, nil
 }
 
 func (u *userService) GetAllUser(ctx context.Context) ([]entity.User, error) {

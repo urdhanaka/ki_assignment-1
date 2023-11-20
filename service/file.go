@@ -130,6 +130,7 @@ func (f *fileService) GetFile(ctx context.Context, filePath string, username str
 	if err != nil {
 		return "", err
 	}
+
 	res, err := utils.GetFileUtility(filePath, user.SecretKey, user.IV)
 	if err != nil {
 		return "", err

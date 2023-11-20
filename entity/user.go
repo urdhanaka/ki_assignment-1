@@ -26,6 +26,7 @@ type (
 	}
 
 	Credential struct {
+		Username     string `json:"username" binding:"required"`
 		Username_AES string `json:"username_aes" binding:"required"`
 		Username_RC4 string `json:"username_rc4" binding:"required"`
 		Username_DEC string `json:"username_dec" binding:"required"`

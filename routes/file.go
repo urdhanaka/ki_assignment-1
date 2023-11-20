@@ -2,11 +2,12 @@ package routes
 
 import (
 	"ki_assignment-1/controllers"
+	"ki_assignment-1/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-func FileRoutes(router *gin.Engine, FileController controllers.FileController) {
+func FileRoutes(router *gin.Engine, FileController controllers.FileController, jwtService service.JWTService) {
 	file := router.Group("/file")
 	{
 		file.POST("/upload", FileController.UploadFile)

@@ -11,6 +11,7 @@ import (
 
 type UserController interface {
 	RegisterUser(c *gin.Context)
+	LoginUser(c *gin.Context)
 	GetAllUser(c *gin.Context)
 	GetUserByID(c *gin.Context)
 	UpdateCredentialUser(c *gin.Context)
@@ -23,6 +24,7 @@ type UserController interface {
 
 type userController struct {
 	UserService service.UserService
+	jwtService  service.JWTService
 }
 
 func NewUserController(userService service.UserService) UserController {
@@ -46,6 +48,33 @@ func (u *userController) RegisterUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
+}
+
+func (u *userController) LoginUser(c *gin.Context) {
+	var userDTO dto.UserLoginDto
+
+	if err := c.ShouldBind(&userDTO); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	verifyUser, err := u.UserService.VerifyUser(c, userDTO)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	token, err := u.jwtService.GenerateToken(verifyUser.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+		"user":  verifyUser,
+	},
+	)
 }
 
 func (u *userController) GetAllUser(c *gin.Context) {

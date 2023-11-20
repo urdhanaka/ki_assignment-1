@@ -16,6 +16,11 @@ type UserCreateDto struct {
 	Password string                `json:"password" binding:"required"`
 }
 
+type UserLoginDto struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
 type UserCredentialUpdateDto struct {
 	ID       uuid.UUID `json:"id" binding:"required"`
 	Username string    `json:"username" binding:"required"`
