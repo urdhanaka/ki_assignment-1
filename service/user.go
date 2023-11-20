@@ -23,7 +23,7 @@ type UserService interface {
 	DeleteUser(ctx context.Context, userID string) error
 	GetAllUserDecrypted(ctx context.Context) ([]entity.User, error)
 	GetUserByIDDecrypted(ctx context.Context, userID string) (entity.User, error)
-	GetUserPublicKeyByID(ctx context.Context, userID string) (string, error)
+	GetUserPublicKeyByID(ctx context.Context, username string) (string, error)
 	GetUserByUsername(ctx context.Context, username string) (entity.User, error)
 }
 
@@ -390,8 +390,13 @@ func (u *userService) GetUserByIDDecrypted(ctx context.Context, userID string) (
 	return user, nil
 }
 
-func (u *userService) GetUserPublicKeyByID(ctx context.Context, userID string) (string, error) {
-	res, err := utils.GetPublicKey(userID)
+func (u *userService) GetUserPublicKeyByID(ctx context.Context, username string) (string, error) {
+	user, err := u.GetUserByUsername(ctx, username)
+	if err != nil {
+		return "", err
+	}
+
+	res, err := utils.GetPublicKey(user.ID)
 	if err != nil {
 		return "", err
 	}

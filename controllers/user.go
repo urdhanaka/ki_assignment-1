@@ -20,7 +20,7 @@ type UserController interface {
 	DeleteUser(c *gin.Context)
 	GetAllUserDecrypted(c *gin.Context)
 	GetUserByIDDecrypted(c *gin.Context)
-	GetUserPublicKeyByID(c *gin.Context)
+	GetUserPublicKeyByUsername(c *gin.Context)
 }
 
 type userController struct {
@@ -74,6 +74,8 @@ func (u *userController) LoginUser(c *gin.Context) {
 	fmt.Println(user.ID, user.Name_AES, user.Username_AES, user.Password_AES)
 
 	token := u.jwtService.GenerateToken(user.ID)
+
+	fmt.Println(token)
 
 	c.JSON(http.StatusOK, gin.H{
 		"token": token,
@@ -172,10 +174,10 @@ func (u *userController) GetUserByIDDecrypted(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-func (u *userController) GetUserPublicKeyByID(c *gin.Context) {
-	userID := c.Param("id")
+func (u *userController) GetUserPublicKeyByUsername(c *gin.Context) {
+	username := c.Param("username")
 
-	publicKey, err := u.UserService.GetUserPublicKeyByID(c, userID)
+	publicKey, err := u.UserService.GetUserPublicKeyByID(c, username)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
