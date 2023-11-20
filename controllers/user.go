@@ -195,9 +195,17 @@ func (u *userController) GetUserPublicKeyByUsername(c *gin.Context) {
 func (u *userController) GetUserPrivateKeyByUsername(c *gin.Context) {
 	token := c.MustGet("token").(string)
 
-	_, err := u.jwtService.FindUserIDByToken(token)
+	userID, err := u.jwtService.FindUserIDByToken(token)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	privateKey, err := u.UserService.GetUserPrivateKeyByID(c, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, privateKey)
 }
