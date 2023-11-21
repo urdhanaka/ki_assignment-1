@@ -26,6 +26,8 @@ type UserService interface {
 	GetUserPublicKeyByID(ctx context.Context, id uuid.UUID) (string, error)
 	GetUserPrivateKeyByID(ctx context.Context, id uuid.UUID) (string, error)
 	GetUserByUsername(ctx context.Context, username string) (entity.User, error)
+	GetAllowedUserByID(ctx context.Context, userID uuid.UUID, allowedUserID uuid.UUID) (entity.AllowedUser, error)
+	GetUserSymmetricKeyByID(userID uuid.UUID) ([]byte, error)
 }
 
 type userService struct {
@@ -426,4 +428,22 @@ func (u *userService) GetUserByUsername(ctx context.Context, username string) (e
 	}
 
 	return result, nil
+}
+
+func (u *userService) GetAllowedUserByID(ctx context.Context, userID uuid.UUID, allowedUserID uuid.UUID) (entity.AllowedUser, error) {
+	result, err := u.UserRepository.GetAllowedUserByID(userID, allowedUserID)
+	if err != nil {
+		return entity.AllowedUser{}, err
+	}
+
+	return result, nil
+}
+
+func (u *userService) GetUserSymmetricKeyByID(userID uuid.UUID) ([]byte, error) {
+	user, err := u.UserRepository.GetUserByID(context.Background(), userID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	return []byte(user.SecretKey), nil
 }

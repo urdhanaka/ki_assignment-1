@@ -52,6 +52,9 @@ type User struct {
 	// user has many files
 	Files []Files `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" binding:"required" json:"files"`
 
+	// user has many allowed users
+	AllowedUsers []AllowedUser `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" binding:"required" json:"allowed_users"`
+
 	Timestamp
 }
 

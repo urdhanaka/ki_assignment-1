@@ -3,8 +3,10 @@ package repository
 import (
 	"context"
 
-	"gorm.io/gorm"
 	"ki_assignment-1/entity"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type UserConnection struct {
@@ -18,6 +20,7 @@ type UserRepository interface {
 	UpdateUser(ctx context.Context, user entity.User) (entity.User, error)
 	DeleteUser(ctx context.Context, userID string) error
 	GetUserByUsername(username string) (entity.User, error)
+	GetAllowedUserByID(id uuid.UUID, allowedUserID uuid.UUID) (entity.AllowedUser, error)
 
 	CalculateAESAlgorithmTime(start int64, end int64) uint64
 }
@@ -85,4 +88,14 @@ func (db *UserConnection) GetUserByUsername(username string) (entity.User, error
 	}
 
 	return user, nil
+}
+
+func (db *UserConnection) GetAllowedUserByID(userID uuid.UUID, allowedUserID uuid.UUID) (entity.AllowedUser, error) {
+	var allowedUser entity.AllowedUser
+
+	if err := db.connection.Where("user_id = ? AND allowed_user_id = ?", userID, allowedUserID).Take(&allowedUser).Error; err != nil {
+		return entity.AllowedUser{}, err
+	}
+
+	return allowedUser, nil
 }

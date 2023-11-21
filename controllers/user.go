@@ -22,6 +22,7 @@ type UserController interface {
 	GetUserByIDDecrypted(c *gin.Context)
 	GetUserPublicKeyByUsername(c *gin.Context)
 	GetUserPrivateKeyByUsername(c *gin.Context)
+	GetUserSymmetricKeyByUsername(c *gin.Context)
 }
 
 type userController struct {
@@ -208,4 +209,46 @@ func (u *userController) GetUserPrivateKeyByUsername(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, privateKey)
+}
+
+func (u *userController) GetUserSymmetricKeyByUsername(c *gin.Context) {
+	// Check if the user is allowed to access other user data
+	// token := c.MustGet("token").(string)
+
+	// userIDRequesting, err := u.jwtService.FindUserIDByToken(token)
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	// 	return
+	// }
+
+	// Get the requesting username from the url
+	username := c.Query("username")
+	userRequested, err := u.UserService.GetUserByUsername(c, username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	// Check if the user exists in allowed users list
+	// allowedUser, err := u.UserService.GetAllowedUserByID(c, userIDRequesting, userRequested.ID)
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	// 	return
+	// }
+
+	// Find the symmetric key
+	// symmetricKey, err := u.UserService.GetUserSymmetricKeyByID(userRequested.ID)
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	// 	return
+	// }
+
+	// Encrypt Secret Key and IV with public key
+
+
+	c.JSON(http.StatusOK, gin.H {
+		"secret_key": userRequested.SecretKey,
+		"secret_key_8bytes": userRequested.SecretKey8Byte,
+		"iv": userRequested.IV,
+		"iv_8bytes": userRequested.IV8Byte,
+	})
 }
