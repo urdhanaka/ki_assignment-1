@@ -26,7 +26,8 @@ type UserService interface {
 	GetUserPrivateKeyByID(ctx context.Context, id uuid.UUID) (string, error)
 	GetUserByUsername(ctx context.Context, username string) (entity.User, error)
 	GetAllowedUserByID(ctx context.Context, userID uuid.UUID, allowedUserID uuid.UUID) (entity.AllowedUser, error)
-	GetUserSymmetricKeyByID(userID uuid.UUID) ([]byte, error)
+	GetUserSymmetricKeyByID(userID uuid.UUID) (string, error)
+	EncryptSecretKey(symmetricKey string, publicKey string) (string, error)
 }
 
 type userService struct {
@@ -438,12 +439,31 @@ func (u *userService) GetAllowedUserByID(ctx context.Context, userID uuid.UUID, 
 	return result, nil
 }
 
-func (u *userService) GetUserSymmetricKeyByID(userID uuid.UUID) ([]byte, error) {
+func (u *userService) GetUserSymmetricKeyByID(userID uuid.UUID) (string, error) {
 	user, err := u.UserRepository.GetUserByID(context.Background(), userID.String())
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return []byte(user.SecretKey), nil
+	return user.SecretKey, nil
 }
 
+func (u *userService) EncryptSecretKey(symmetricKey string, publicKey string) (string, error) {
+	encryptedKey, err := utils.EncryptSymmetricKey(symmetricKey, publicKey)
+	if err != nil {
+		return "", err
+	}
+
+	return encryptedKey, nil
+}
+
+// func (u* userService) GetPrivateData(ctx context.Context, privateKey string) (string, error) {
+// 	privateKey, err := []byte(privateKey), nil
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+	
+
+
+// }

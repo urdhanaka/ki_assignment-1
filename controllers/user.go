@@ -212,13 +212,13 @@ func (u *userController) GetUserPrivateKeyByUsername(c *gin.Context) {
 
 func (u *userController) GetUserSymmetricKeyByUsername(c *gin.Context) {
 	// Check if the user is allowed to access other user data
-	// token := c.MustGet("token").(string)
+	token := c.MustGet("token").(string)
 
-	// userIDRequesting, err := u.jwtService.FindUserIDByToken(token)
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	userIDRequesting, err := u.jwtService.FindUserIDByToken(token)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Get the requesting username from the url
 	username := c.Query("username")
@@ -227,6 +227,14 @@ func (u *userController) GetUserSymmetricKeyByUsername(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Get the requesting user's public key
+	publicKey, err := u.UserService.GetUserPublicKeyByID(c, userIDRequesting)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Check if the user exists in allowed users list
 	// allowedUser, err := u.UserService.GetAllowedUserByID(c, userIDRequesting, userRequested.ID)
 	// if err != nil {
@@ -235,19 +243,27 @@ func (u *userController) GetUserSymmetricKeyByUsername(c *gin.Context) {
 	// }
 
 	// Find the symmetric key
-	// symmetricKey, err := u.UserService.GetUserSymmetricKeyByID(userRequested.ID)
-	// if err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	symmetricKey, err := u.UserService.GetUserSymmetricKeyByID(userRequested.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
 	// Encrypt Secret Key and IV with public key
 
-	c.JSON(http.StatusOK, gin.H{
-		"secret_key":        userRequested.SecretKey,
-		"secret_key_8bytes": userRequested.SecretKey8Byte,
-		"iv":                userRequested.IV,
-		"iv_8bytes":         userRequested.IV8Byte,
-	})
+	encryptedKey, err := u.UserService.EncryptSecretKey(symmetricKey, publicKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// c.JSON(http.StatusOK, gin.H{
+	// 	"secret_key":        userRequested.SecretKey,
+	// 	"secret_key_8bytes": userRequested.SecretKey8Byte,
+	// 	"iv":                userRequested.IV,
+	// 	"iv_8bytes":         userRequested.IV8Byte,
+	// })
+
+	c.JSON(http.StatusOK, encryptedKey)
 }
 
