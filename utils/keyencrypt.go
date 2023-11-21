@@ -3,26 +3,17 @@ package utils
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/x509"
+	"crypto/sha256"
 	"encoding/base64"
-	"errors"
 )
 
 // EncryptSymmetricKey encrypts a symmetric key using RSA public key.
-func EncryptSymmetricKey(symmetricKey string, publicKeyString string) (string, error) {
+func EncryptSymmetricKey(symmetricKey string, publicKeyString *rsa.PublicKey) (string, error) {
 	keyBytes := []byte(symmetricKey)
+	oaepLabel := []byte("")
+	oaepDigest := sha256.New()
 
-	publicKey, err := x509.ParsePKIXPublicKey([]byte(publicKeyString))
-	if err != nil {
-		return "", err
-	}
-
-	rsaPublicKey, ok := publicKey.(*rsa.PublicKey)
-	if !ok {
-		return "", errors.New("failed to parse DER encoded public key")
-	}
-
-	encryptedData, err := rsa.EncryptPKCS1v15(rand.Reader, rsaPublicKey, keyBytes)
+	encryptedData, err := rsa.EncryptOAEP(oaepDigest, rand.Reader, publicKeyString, keyBytes, oaepLabel)
 	if err != nil {
 		return "", err
 	}

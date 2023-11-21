@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"crypto/rsa"
 	"errors"
 	"fmt"
 	"ki_assignment-1/dto"
@@ -23,11 +24,12 @@ type UserService interface {
 	GetAllUserDecrypted(ctx context.Context) ([]entity.User, error)
 	GetUserByIDDecrypted(ctx context.Context, userID string) (entity.User, error)
 	GetUserPublicKeyByID(ctx context.Context, id uuid.UUID) (string, error)
+	GetUserRSAPublicKeyByID(ctx context.Context, id uuid.UUID) (*rsa.PublicKey, error)
 	GetUserPrivateKeyByID(ctx context.Context, id uuid.UUID) (string, error)
 	GetUserByUsername(ctx context.Context, username string) (entity.User, error)
 	GetAllowedUserByID(ctx context.Context, userID uuid.UUID, allowedUserID uuid.UUID) (entity.AllowedUser, error)
 	GetUserSymmetricKeyByID(userID uuid.UUID) (string, error)
-	EncryptSecretKey(symmetricKey string, publicKey string) (string, error)
+	EncryptSecretKey(symmetricKey string, publicKey *rsa.PublicKey) (string, error)
 }
 
 type userService struct {
@@ -407,6 +409,20 @@ func (u *userService) GetUserPublicKeyByID(ctx context.Context, id uuid.UUID) (s
 	return res, nil
 }
 
+func (u *userService) GetUserRSAPublicKeyByID(ctx context.Context, id uuid.UUID) (*rsa.PublicKey, error) {
+	user, err := u.UserRepository.GetUserByID(ctx, id.String())
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := utils.GetRSAPublicKey(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
 func (u *userService) GetUserPrivateKeyByID(ctx context.Context, id uuid.UUID) (string, error) {
 	user, err := u.UserRepository.GetUserByID(ctx, id.String())
 	if err != nil {
@@ -448,7 +464,7 @@ func (u *userService) GetUserSymmetricKeyByID(userID uuid.UUID) (string, error) 
 	return user.SecretKey, nil
 }
 
-func (u *userService) EncryptSecretKey(symmetricKey string, publicKey string) (string, error) {
+func (u *userService) EncryptSecretKey(symmetricKey string, publicKey *rsa.PublicKey) (string, error) {
 	encryptedKey, err := utils.EncryptSymmetricKey(symmetricKey, publicKey)
 	if err != nil {
 		return "", err
@@ -462,8 +478,5 @@ func (u *userService) EncryptSecretKey(symmetricKey string, publicKey string) (s
 // 	if err != nil {
 // 		return "", err
 // 	}
-
-	
-
 
 // }

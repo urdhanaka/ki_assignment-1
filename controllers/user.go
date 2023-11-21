@@ -229,7 +229,7 @@ func (u *userController) GetUserSymmetricKeyByUsername(c *gin.Context) {
 	}
 
 	// Get the requesting user's public key
-	publicKey, err := u.UserService.GetUserPublicKeyByID(c, userIDRequesting)
+	publicKey, err := u.UserService.GetUserRSAPublicKeyByID(c, userIDRequesting)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -266,4 +266,3 @@ func (u *userController) GetUserSymmetricKeyByUsername(c *gin.Context) {
 
 	c.JSON(http.StatusOK, encryptedKey)
 }
-
