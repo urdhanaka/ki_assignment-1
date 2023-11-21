@@ -1,46 +1,60 @@
 package utils
 
 import (
-	"crypto/rand"
+	cryptrand "crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/google/uuid"
 )
 
-func GenerateSecretKey() []byte {
+var charset = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+func randSeq(length int) string {
+	init := make([]rune, length)
+
+	for i := range init {
+		init[i] = charset[rand.Intn(len(charset))]
+	}
+
+	return string(init)
+}
+
+func GenerateSecretKey() string {
 	// Generate Secret Key
-	secret := make([]byte, 32)
-	rand.Read(secret)
+	secret := randSeq(32)
 	return secret
 }
 
-func GenerateSecretKey8Byte() []byte {
+func GenerateSecretKey8Byte() string {
 	// Generate Secret Key
-	secret := make([]byte, 8)
-	rand.Read(secret)
+	secret := randSeq(8)
 	return secret
 }
 
-func GenerateIV() []byte {
+func GenerateIV() string {
 	// Generate IV
-	iv := make([]byte, 16)
-	rand.Read(iv)
+	iv := randSeq(16)
 	return iv
 }
 
-func Generate8Byte() []byte {
+func Generate8Byte() string {
 	// Generate 8 Byte IV
-	iv := make([]byte, 8)
-	rand.Read(iv)
+	iv := randSeq(8)
 	return iv
 }
 
 func GenerateAsymmetricKeys(id uuid.UUID) error {
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	privateKey, err := rsa.GenerateKey(cryptrand.Reader, 2048)
 	if err != nil {
 		return err
 	}

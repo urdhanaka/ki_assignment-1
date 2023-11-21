@@ -2,10 +2,9 @@ package controllers
 
 import (
 	"fmt"
-	"net/http"
-
 	"ki_assignment-1/dto"
 	"ki_assignment-1/service"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -244,11 +243,11 @@ func (u *userController) GetUserSymmetricKeyByUsername(c *gin.Context) {
 
 	// Encrypt Secret Key and IV with public key
 
-
-	c.JSON(http.StatusOK, gin.H {
-		"secret_key": userRequested.SecretKey,
+	c.JSON(http.StatusOK, gin.H{
+		"secret_key":        userRequested.SecretKey,
 		"secret_key_8bytes": userRequested.SecretKey8Byte,
-		"iv": userRequested.IV,
-		"iv_8bytes": userRequested.IV8Byte,
+		"iv":                userRequested.IV,
+		"iv_8bytes":         userRequested.IV8Byte,
 	})
 }
+

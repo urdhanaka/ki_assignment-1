@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func UploadFileUtility(file *multipart.FileHeader, path string, secretKeyParam []byte, ivParam []byte) error {
+func UploadFileUtility(file *multipart.FileHeader, path string, secretKeyParam string, ivParam string) error {
 	parts := strings.Split(path, "/")
 
 	fileId := parts[2]
@@ -57,7 +57,7 @@ func GetFileUtility(path string, secretKeyParam []byte, ivParam []byte) (string,
 		return "path", err
 	}
 
-	decryptedFileData, err := DecryptAESFile(fileData, secretKeyParam, ivParam)
+	decryptedFileData, err := DecryptAESFile(fileData, string(secretKeyParam), string(ivParam))
 	if err != nil {
 		return "", err
 	}

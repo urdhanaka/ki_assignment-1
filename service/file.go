@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"ki_assignment-1/dto"
 	"ki_assignment-1/entity"
 	"ki_assignment-1/repository"
@@ -132,7 +131,7 @@ func (f *fileService) GetFile(ctx context.Context, filePath string, username str
 		return "", err
 	}
 
-	res, err := utils.GetFileUtility(filePath, user.SecretKey, user.IV)
+	res, err := utils.GetFileUtility(filePath, []byte(user.SecretKey), []byte(user.IV))
 	if err != nil {
 		return "", err
 	}

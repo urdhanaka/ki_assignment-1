@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	"ki_assignment-1/dto"
 	"ki_assignment-1/entity"
 	"ki_assignment-1/repository"
@@ -129,7 +128,7 @@ func (u *userService) VerifyUser(ctx context.Context, userDTO dto.UserLoginDto) 
 		return false, err
 	}
 
-	encryptedPassword, err := utils.EncryptAES([]byte(userDTO.Password), []byte(user.SecretKey), []byte(user.IV))
+	encryptedPassword, err := utils.EncryptAES([]byte(userDTO.Password), user.SecretKey, user.IV)
 	if err != nil {
 		return false, err
 	}
@@ -275,27 +274,27 @@ func (u *userService) GetAllUserDecrypted(ctx context.Context) ([]entity.User, e
 		}
 
 		// RC4
-		decryptedNameRC4, err := utils.DecryptRC4(users[i].Name_RC4, users[i].SecretKey, users[i].IV)
+		decryptedNameRC4, err := utils.DecryptRC4(users[i].Name_RC4, users[i].SecretKey)
 		if err == nil {
 			users[i].Name_RC4 = decryptedNameRC4
 		}
-		decryptedNumberRC4, err := utils.DecryptRC4(users[i].Number_RC4, users[i].SecretKey, users[i].IV)
+		decryptedNumberRC4, err := utils.DecryptRC4(users[i].Number_RC4, users[i].SecretKey)
 		if err == nil {
 			users[i].Number_RC4 = decryptedNumberRC4
 		}
-		decryptedCVRC4, err := utils.DecryptRC4(users[i].CV_RC4, users[i].SecretKey, users[i].IV)
+		decryptedCVRC4, err := utils.DecryptRC4(users[i].CV_RC4, users[i].SecretKey)
 		if err == nil {
 			users[i].CV_RC4 = decryptedCVRC4
 		}
-		decryptedIDCardRC4, err := utils.DecryptRC4(users[i].ID_Card_RC4, users[i].SecretKey, users[i].IV)
+		decryptedIDCardRC4, err := utils.DecryptRC4(users[i].ID_Card_RC4, users[i].SecretKey)
 		if err == nil {
 			users[i].ID_Card_RC4 = decryptedIDCardRC4
 		}
-		decryptedUsernameRC4, err := utils.DecryptRC4(users[i].Username_RC4, users[i].SecretKey, users[i].IV)
+		decryptedUsernameRC4, err := utils.DecryptRC4(users[i].Username_RC4, users[i].SecretKey)
 		if err == nil {
 			users[i].Username_RC4 = decryptedUsernameRC4
 		}
-		decryptedPasswordRC4, err := utils.DecryptRC4(users[i].Password_RC4, users[i].SecretKey, users[i].IV)
+		decryptedPasswordRC4, err := utils.DecryptRC4(users[i].Password_RC4, users[i].SecretKey)
 		if err == nil {
 			users[i].Password_RC4 = decryptedPasswordRC4
 		}
@@ -364,28 +363,28 @@ func (u *userService) GetUserByIDDecrypted(ctx context.Context, userID string) (
 	}
 
 	// RC4
-	decryptedNameRC4, err := utils.DecryptRC4(user.Name_RC4, user.SecretKey, user.IV)
+	decryptedNameRC4, err := utils.DecryptRC4(user.Name_RC4, user.SecretKey)
 	if err == nil {
 		user.Name_RC4 = decryptedNameRC4
 	}
-	decryptedNumberRC4, err := utils.DecryptRC4(user.Number_RC4, user.SecretKey, user.IV)
+	decryptedNumberRC4, err := utils.DecryptRC4(user.Number_RC4, user.SecretKey)
 	if err == nil {
 		user.Number_RC4 = decryptedNumberRC4
 	}
-	decryptedCVRC4, err := utils.DecryptRC4(user.CV_RC4, user.SecretKey, user.IV)
+	decryptedCVRC4, err := utils.DecryptRC4(user.CV_RC4, user.SecretKey)
 	if err == nil {
 		user.CV_RC4 = decryptedCVRC4
 	}
-	decryptedIDCardRC4, err := utils.DecryptRC4(user.ID_Card_RC4, user.SecretKey, user.IV)
+	decryptedIDCardRC4, err := utils.DecryptRC4(user.ID_Card_RC4, user.SecretKey)
 	if err == nil {
 		user.ID_Card_RC4 = decryptedIDCardRC4
 	}
-	decryptedUsernameRC4, err := utils.DecryptRC4(user.Username_RC4, user.SecretKey, user.IV)
+	decryptedUsernameRC4, err := utils.DecryptRC4(user.Username_RC4, user.SecretKey)
 	if err == nil {
 		user.Username_RC4 = decryptedUsernameRC4
 	}
 
-	decryptedPasswordRC4, err := utils.DecryptRC4(user.Password_RC4, user.SecretKey, user.IV)
+	decryptedPasswordRC4, err := utils.DecryptRC4(user.Password_RC4, user.SecretKey)
 	if err == nil {
 		user.Password_RC4 = decryptedPasswordRC4
 	}
@@ -447,3 +446,4 @@ func (u *userService) GetUserSymmetricKeyByID(userID uuid.UUID) ([]byte, error) 
 
 	return []byte(user.SecretKey), nil
 }
+

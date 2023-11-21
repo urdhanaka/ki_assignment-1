@@ -34,3 +34,9 @@ type UserIdentityUpdateDto struct {
 	CV      *multipart.FileHeader `json:"cv" binding:"required"`
 	ID_Card *multipart.FileHeader `json:"id_card" binding:"required"`
 }
+
+type UserRequestDataDTO struct {
+	ID           uuid.UUID `json:"id" binding:"required"`
+	Username     string    `json:"username" binding:"required"`
+	SymmetricKey string    `json:"symmetric_key"`
+}

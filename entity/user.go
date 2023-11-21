@@ -36,10 +36,10 @@ type (
 	}
 
 	Key struct {
-		SecretKey      []byte `json:"secret" binding:"required"`
-		IV             []byte `json:"iv" binding:"required"`
-		SecretKey8Byte []byte `json:"secret_key_8_byte" binding:"required"`
-		IV8Byte        []byte `json:"iv_8_byte" binding:"required"`
+		SecretKey      string `json:"secret" binding:"required"`
+		IV             string `json:"iv" binding:"required"`
+		SecretKey8Byte string `json:"secret_key_8_byte" binding:"required"`
+		IV8Byte        string `json:"iv_8_byte" binding:"required"`
 	}
 )
 
@@ -69,7 +69,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4), u.SecretKey); err == nil {
 		u.Username_RC4 = string(enc)
 	}
 
@@ -83,7 +83,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4), u.SecretKey); err == nil {
 		u.Password_RC4 = string(enc)
 	}
 
@@ -101,7 +101,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.Name_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.Name_RC4), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Name_RC4), u.SecretKey); err == nil {
 		u.Name_RC4 = string(enc)
 	}
 
@@ -114,7 +114,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.Number_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.Number_RC4), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Number_RC4), u.SecretKey); err == nil {
 		u.Number_RC4 = string(enc)
 	}
 
@@ -127,7 +127,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.CV_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.CV_RC4), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.CV_RC4), u.SecretKey); err == nil {
 		u.CV_RC4 = string(enc)
 	}
 
@@ -140,7 +140,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 		u.ID_Card_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.ID_Card_RC4), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.ID_Card_RC4), u.SecretKey); err == nil {
 		u.ID_Card_RC4 = string(enc)
 	}
 
@@ -154,7 +154,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Username_RC4), u.SecretKey); err == nil {
 		u.Username_RC4 = string(enc)
 	}
 
@@ -168,7 +168,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 	}
 
 	// Done
-	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Password_RC4), u.SecretKey); err == nil {
 		u.Password_RC4 = string(enc)
 	}
 
@@ -186,7 +186,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		u.Name_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.Name_RC4), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Name_RC4), u.SecretKey); err == nil {
 		u.Name_RC4 = string(enc)
 	}
 
@@ -199,7 +199,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		u.Number_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.Number_RC4), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.Number_RC4), u.SecretKey); err == nil {
 		u.Number_RC4 = string(enc)
 	}
 
@@ -212,7 +212,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		u.CV_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.CV_RC4), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.CV_RC4), u.SecretKey); err == nil {
 		u.CV_RC4 = string(enc)
 	}
 
@@ -225,7 +225,7 @@ func (u *User) BeforeUpdate(tx *gorm.DB) error {
 		u.ID_Card_DEC = string(enc)
 	}
 
-	if enc, err := utils.EncryptRC4([]byte(u.ID_Card_RC4), u.SecretKey, u.IV); err == nil {
+	if enc, err := utils.EncryptRC4([]byte(u.ID_Card_RC4), u.SecretKey); err == nil {
 		u.ID_Card_RC4 = string(enc)
 	}
 

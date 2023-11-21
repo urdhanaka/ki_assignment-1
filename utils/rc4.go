@@ -3,15 +3,13 @@ package utils
 import (
 	"crypto/rc4"
 	"encoding/base64"
-
 	"time"
 )
 
 // RC4 is cryptographically broken and should not be used for secure
 // applications.
 
-func EncryptRC4(data []byte, secretKeyParam []byte, ivParam []byte) (string, error) {
-
+func EncryptRC4(data []byte, secretKeyParam string) (string, error) {
 	elapsedTime := timer("RC4-Encrypt")
 	defer elapsedTime()
 	time.Sleep(1 * time.Second)
@@ -30,8 +28,7 @@ func EncryptRC4(data []byte, secretKeyParam []byte, ivParam []byte) (string, err
 	return res, nil
 }
 
-func DecryptRC4(encrypted string, secretKeyParam []byte, ivParam []byte) (string, error) {
-
+func DecryptRC4(encrypted string, secretKeyParam string) (string, error) {
 	elapsedTime := timer("RC4-Decrypt")
 	defer elapsedTime()
 	time.Sleep(1 * time.Second)
