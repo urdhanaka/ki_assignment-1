@@ -23,3 +23,24 @@ func EncryptSymmetricKey(symmetricKey string, publicKeyString *rsa.PublicKey) (s
 
 	return encryptedString, nil
 }
+
+// DecryptSymmetricKey decrypts a symmetric key using RSA private key.
+func DecryptSymmetricKey(encryptedSymmetricKey string, privateKeyString *rsa.PrivateKey) (string, error) {
+	encryptedData, err := base64.StdEncoding.DecodeString(encryptedSymmetricKey)
+	if err != nil {
+		return "", err
+	}
+
+	oaepLabel := []byte("")
+	oaepDigest := sha256.New()
+
+	decryptedData, err := rsa.DecryptOAEP(oaepDigest, rand.Reader, privateKeyString, encryptedData, oaepLabel)
+	if err != nil {
+		return "", err
+	}
+
+	// Convert the decrypted data to a string.
+	decryptedString := string(decryptedData)
+
+	return decryptedString, nil
+}

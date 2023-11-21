@@ -257,12 +257,37 @@ func (u *userController) GetUserSymmetricKeyByUsername(c *gin.Context) {
 		return
 	}
 
-	// c.JSON(http.StatusOK, gin.H{
-	// 	"secret_key":        userRequested.SecretKey,
-	// 	"secret_key_8bytes": userRequested.SecretKey8Byte,
-	// 	"iv":                userRequested.IV,
-	// 	"iv_8bytes":         userRequested.IV8Byte,
-	// })
-
 	c.JSON(http.StatusOK, encryptedKey)
+}
+
+func (u *userController) GetUserPrivateData(c *gin.Context) {
+	token := c.MustGet("token").(string)
+
+	userIDRequesting, err := u.jwtService.FindUserIDByToken(token)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get requesting user's private key
+	privateKey, err := u.UserService.GetUserPrivateKeyByID(c, userIDRequesting)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Decrypt symmetric key with private key
+	symmetricKey := c.Query("symmetricKey")
+	decryptedSymmetricKey, err := u.UserService.DecryptSecretKey(symmetricKey, privateKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get user's private data
+	
+
+
+
+
 }

@@ -25,11 +25,12 @@ type UserService interface {
 	GetUserByIDDecrypted(ctx context.Context, userID string) (entity.User, error)
 	GetUserPublicKeyByID(ctx context.Context, id uuid.UUID) (string, error)
 	GetUserRSAPublicKeyByID(ctx context.Context, id uuid.UUID) (*rsa.PublicKey, error)
-	GetUserPrivateKeyByID(ctx context.Context, id uuid.UUID) (string, error)
+	GetUserPrivateKeyByID(ctx context.Context, id uuid.UUID) (*rsa.PrivateKey, error)
 	GetUserByUsername(ctx context.Context, username string) (entity.User, error)
 	GetAllowedUserByID(ctx context.Context, userID uuid.UUID, allowedUserID uuid.UUID) (entity.AllowedUser, error)
 	GetUserSymmetricKeyByID(userID uuid.UUID) (string, error)
 	EncryptSecretKey(symmetricKey string, publicKey *rsa.PublicKey) (string, error)
+	DecryptSecretKey(encryptedKey string, privateKey *rsa.PrivateKey) (string, error)
 }
 
 type userService struct {
@@ -423,15 +424,15 @@ func (u *userService) GetUserRSAPublicKeyByID(ctx context.Context, id uuid.UUID)
 	return res, nil
 }
 
-func (u *userService) GetUserPrivateKeyByID(ctx context.Context, id uuid.UUID) (string, error) {
+func (u *userService) GetUserPrivateKeyByID(ctx context.Context, id uuid.UUID) (*rsa.PrivateKey, error) {
 	user, err := u.UserRepository.GetUserByID(ctx, id.String())
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	res, err := utils.GetPrivateKey(user.ID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	return res, nil
@@ -473,10 +474,22 @@ func (u *userService) EncryptSecretKey(symmetricKey string, publicKey *rsa.Publi
 	return encryptedKey, nil
 }
 
-// func (u* userService) GetPrivateData(ctx context.Context, privateKey string) (string, error) {
-// 	privateKey, err := []byte(privateKey), nil
+func (u *userService) DecryptSecretKey(encryptedKey string, privateKey *rsa.PrivateKey) (string, error) {
+	decryptedKey, err := utils.DecryptSymmetricKey(encryptedKey, privateKey)
+	if err != nil {
+		return "", err
+	}
+
+	return decryptedKey, nil
+}
+
+// func (u* userService) GetPrivateData(ctx context.Context, secretKey string) (string, error) {
+// 	secretKey, err := []byte(secretKey), nil
 // 	if err != nil {
 // 		return "", err
 // 	}
+
+// 	// Get private data
+// 	privateData, err := u.UserRepository.GetPrivateData(ctx)
 
 // }

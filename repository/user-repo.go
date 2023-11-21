@@ -99,3 +99,4 @@ func (db *UserConnection) GetAllowedUserByID(userID uuid.UUID, allowedUserID uui
 
 	return allowedUser, nil
 }
+

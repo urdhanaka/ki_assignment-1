@@ -43,17 +43,19 @@ func GetRSAPublicKey(id uuid.UUID) (*rsa.PublicKey, error) {
 	return publicKey, nil
 }
 
-func GetPrivateKey(id uuid.UUID) (string, error) {
+func GetPrivateKey(id uuid.UUID) (*rsa.PrivateKey, error) {
 	userPrivateKeyFilename := fmt.Sprintf("keys/private-keys/%s.pem", id)
 
 	privateKeyPem, err := os.ReadFile(userPrivateKeyFilename)
 	if err != nil {
-		return "", nil
+		return nil, err
 	}
 
 	privateKeyBlock, _ := pem.Decode(privateKeyPem)
+	privateKey, err := x509.ParsePKCS1PrivateKey(privateKeyBlock.Bytes)
+	if err != nil {
+		return nil, err
+	}
 
-	res := base64.StdEncoding.EncodeToString(privateKeyBlock.Bytes)
-
-	return res, nil
+	return privateKey, nil
 }
