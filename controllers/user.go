@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"ki_assignment-1/dto"
 	"ki_assignment-1/service"
+	"ki_assignment-1/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,7 @@ type UserController interface {
 	GetUserPublicKeyByUsername(c *gin.Context)
 	GetUserPrivateKeyByUsername(c *gin.Context)
 	GetUserSymmetricKeyByUsername(c *gin.Context)
+	GetUserPrivateData(c *gin.Context)
 }
 
 type userController struct {
@@ -261,6 +263,7 @@ func (u *userController) GetUserSymmetricKeyByUsername(c *gin.Context) {
 }
 
 func (u *userController) GetUserPrivateData(c *gin.Context) {
+	var encryptedRequestDto dto.EncryptedRequestedUserSymmetricKeysDTO
 	token := c.MustGet("token").(string)
 
 	userIDRequesting, err := u.jwtService.FindUserIDByToken(token)
@@ -277,17 +280,27 @@ func (u *userController) GetUserPrivateData(c *gin.Context) {
 	}
 
 	// Decrypt symmetric key with private key
-	symmetricKey := c.Query("symmetricKey")
-	decryptedSymmetricKey, err := u.UserService.DecryptSecretKey(symmetricKey, privateKey)
+	encryptedRequestDto.EncryptedSecretKey = c.Query("encrypted_secret_key")
+	encryptedRequestDto.EncryptedIVKey = c.Query("encrypted_iv_key")
+	decryptedSymmetricKey, err := u.UserService.DecryptSecretKey(encryptedRequestDto, privateKey)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Get user's private data
-	
+	requestedUsername := c.Query("requested_username")
+	requestedUserEntity, err := u.UserService.GetUserByUsername(c, requestedUsername)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
+	decryptedUsername, err := utils.DecryptAES(requestedUserEntity.Name_AES, decryptedSymmetricKey.DecryptedSecretKey, decryptedSymmetricKey.DecryptedIVKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-
-
+	c.JSON(http.StatusOK, decryptedUsername)
 }

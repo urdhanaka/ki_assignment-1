@@ -28,9 +28,9 @@ type UserService interface {
 	GetUserPrivateKeyByID(ctx context.Context, id uuid.UUID) (*rsa.PrivateKey, error)
 	GetUserByUsername(ctx context.Context, username string) (entity.User, error)
 	GetAllowedUserByID(ctx context.Context, userID uuid.UUID, allowedUserID uuid.UUID) (entity.AllowedUser, error)
-	GetUserSymmetricKeyByID(userID uuid.UUID) (string, error)
-	EncryptSecretKey(symmetricKey string, publicKey *rsa.PublicKey) (string, error)
-	DecryptSecretKey(encryptedKey string, privateKey *rsa.PrivateKey) (string, error)
+	GetUserSymmetricKeyByID(userID uuid.UUID) (dto.RequestedUserSymmetricKeysDTO, error)
+	EncryptSecretKey(request dto.RequestedUserSymmetricKeysDTO, publicKey *rsa.PublicKey) (dto.EncryptedRequestedUserSymmetricKeysDTO, error)
+	DecryptSecretKey(request dto.EncryptedRequestedUserSymmetricKeysDTO, privateKey *rsa.PrivateKey) (dto.DecryptedRequestedUserSymmetricKeysDTO, error)
 }
 
 type userService struct {
@@ -456,40 +456,47 @@ func (u *userService) GetAllowedUserByID(ctx context.Context, userID uuid.UUID, 
 	return result, nil
 }
 
-func (u *userService) GetUserSymmetricKeyByID(userID uuid.UUID) (string, error) {
+func (u *userService) GetUserSymmetricKeyByID(userID uuid.UUID) (dto.RequestedUserSymmetricKeysDTO, error) {
+	var symmetricKeys dto.RequestedUserSymmetricKeysDTO
+
 	user, err := u.UserRepository.GetUserByID(context.Background(), userID.String())
 	if err != nil {
-		return "", err
+		return dto.RequestedUserSymmetricKeysDTO{}, err
 	}
 
-	return user.SecretKey, nil
+	symmetricKeys.SecretKey = user.SecretKey
+	symmetricKeys.IV = user.IV
+	symmetricKeys.SecretKey8Byte = user.SecretKey8Byte
+	symmetricKeys.IV8Byte = user.IV8Byte
+
+	return symmetricKeys, nil
 }
 
-func (u *userService) EncryptSecretKey(symmetricKey string, publicKey *rsa.PublicKey) (string, error) {
-	encryptedKey, err := utils.EncryptSymmetricKey(symmetricKey, publicKey)
+func (u *userService) EncryptSecretKey(request dto.RequestedUserSymmetricKeysDTO, publicKey *rsa.PublicKey) (dto.EncryptedRequestedUserSymmetricKeysDTO, error) {
+	encryptedKey, err := utils.EncryptSymmetricKey(request, publicKey)
 	if err != nil {
-		return "", err
+		return dto.EncryptedRequestedUserSymmetricKeysDTO{}, err
 	}
 
 	return encryptedKey, nil
 }
 
-func (u *userService) DecryptSecretKey(encryptedKey string, privateKey *rsa.PrivateKey) (string, error) {
-	decryptedKey, err := utils.DecryptSymmetricKey(encryptedKey, privateKey)
+func (u *userService) DecryptSecretKey(request dto.EncryptedRequestedUserSymmetricKeysDTO, privateKey *rsa.PrivateKey) (dto.DecryptedRequestedUserSymmetricKeysDTO, error) {
+	decryptedKey, err := utils.DecryptSymmetricKey(request, privateKey)
 	if err != nil {
-		return "", err
+		return dto.DecryptedRequestedUserSymmetricKeysDTO{}, err
 	}
 
 	return decryptedKey, nil
 }
 
-// func (u* userService) GetPrivateData(ctx context.Context, secretKey string) (string, error) {
-// 	secretKey, err := []byte(secretKey), nil
+// func (u *userService) GetPrivateData(ctx context.Context, secretKey string, username string) (string, error) {
+// 	var userEntity entity.User
+// 	secretKeyBytes := []byte(secretKey)
+//
+// 	// Get private data
+// 	privateData, err := u.UserRepository.GetUserByUsername(username)
 // 	if err != nil {
 // 		return "", err
 // 	}
-
-// 	// Get private data
-// 	privateData, err := u.UserRepository.GetPrivateData(ctx)
-
 // }

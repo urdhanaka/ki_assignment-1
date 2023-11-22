@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-
 	"ki_assignment-1/entity"
 
 	"github.com/google/uuid"
@@ -99,4 +98,3 @@ func (db *UserConnection) GetAllowedUserByID(userID uuid.UUID, allowedUserID uui
 
 	return allowedUser, nil
 }
-

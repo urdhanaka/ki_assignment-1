@@ -23,5 +23,6 @@ func UserRoutes(router *gin.Engine, UserController controllers.UserController, j
 		user.GET("/public", middleware.Authenticate(jwtService), UserController.GetUserPublicKeyByUsername)
 		user.GET("/private", middleware.Authenticate(jwtService), UserController.GetUserPrivateKeyByUsername)
 		user.GET("/symmetric", middleware.Authenticate(jwtService), UserController.GetUserSymmetricKeyByUsername)
+		user.GET("/get-private-data", middleware.Authenticate(jwtService), UserController.GetUserPrivateData)
 	}
 }
