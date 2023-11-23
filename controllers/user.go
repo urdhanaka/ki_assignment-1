@@ -97,9 +97,15 @@ func (u *userController) GetAllUser(c *gin.Context) {
 }
 
 func (u *userController) GetUserByID(c *gin.Context) {
-	id := c.Param("id")
+	token := c.MustGet("token").(string)
 
-	user, err := u.UserService.GetUserByID(c, id)
+	userID, err := u.jwtService.FindUserIDByToken(token)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := u.UserService.GetUserByID(c, userID.String())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -109,6 +115,21 @@ func (u *userController) GetUserByID(c *gin.Context) {
 }
 
 func (u *userController) UpdateCredentialUser(c *gin.Context) {
+	token := c.MustGet("token").(string)
+
+	userID, err := u.jwtService.FindUserIDByToken(token)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Get user by ID
+	user, err := u.UserService.GetUserByID(c, userID.String())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	var userDTO dto.UserCredentialUpdateDto
 
 	if err := c.ShouldBindJSON(&userDTO); err != nil {
@@ -116,7 +137,7 @@ func (u *userController) UpdateCredentialUser(c *gin.Context) {
 		return
 	}
 
-	user, err := u.UserService.CredentialUpdateUser(c, userDTO)
+	user, err = u.UserService.CredentialUpdateUser(c, userDTO)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -165,9 +186,15 @@ func (u *userController) GetAllUserDecrypted(c *gin.Context) {
 }
 
 func (u *userController) GetUserByIDDecrypted(c *gin.Context) {
-	id := c.Param("id")
+	token := c.MustGet("token").(string)
 
-	user, err := u.UserService.GetUserByIDDecrypted(c, id)
+	userID, err := u.jwtService.FindUserIDByToken(token)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	user, err := u.UserService.GetUserByIDDecrypted(c, userID.String())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
