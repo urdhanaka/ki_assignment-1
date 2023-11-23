@@ -11,31 +11,31 @@ func Authenticate(jwtService service.JWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
+			c.AbortWithStatusJSON(401, gin.H{"error": "Token Tidak Ditemukan"})
 			return
 		}
-		if !strings.Contains(authHeader, "Bearer") {
-			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
+		if !strings.Contains(authHeader, "Bearer ") {
+			c.AbortWithStatusJSON(401, gin.H{"error": "Token Tidak Valid"})
 			return
 		}
-		tokenString := strings.Replace(authHeader, "Bearer ", "", -1)
-		token, err := jwtService.ValidateToken(tokenString)
+		authHeader = strings.Replace(authHeader, "Bearer ", "", -1)
+		token, err := jwtService.ValidateToken(authHeader)
 		if err != nil {
-			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
+			c.AbortWithStatusJSON(401, gin.H{"error": "Token Tidak Valid"})
 			return
 		}
 		if !token.Valid {
-			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
+			c.AbortWithStatusJSON(401, gin.H{"error": "Akses Ditolak"})
 			return
 		}
 
-		userID, err := jwtService.FindUserIDByToken(tokenString)
+		userID, err := jwtService.FindUserIDByToken(authHeader)
 		if err != nil {
-			c.AbortWithStatusJSON(401, gin.H{"error": "Unauthorized"})
+			c.AbortWithStatusJSON(401, gin.H{"error": err.Error()})
 			return
 		}
 
-		c.Set("token", tokenString)
+		c.Set("token", authHeader)
 		c.Set("userID", userID)
 		c.Next()
 	}
