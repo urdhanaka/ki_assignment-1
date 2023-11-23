@@ -20,7 +20,6 @@ type UserRepository interface {
 	DeleteUser(ctx context.Context, userID string) error
 	GetUserByUsername(username string) (entity.User, error)
 	GetAllowedUserByID(id uuid.UUID, allowedUserID uuid.UUID) (entity.AllowedUser, error)
-
 	CalculateAESAlgorithmTime(start int64, end int64) uint64
 }
 
