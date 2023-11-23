@@ -6,7 +6,6 @@ import (
 	"crypto/cipher"
 	"encoding/base64"
 	"fmt"
-	"time"
 )
 
 func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
@@ -28,10 +27,6 @@ func PKCS5Unpadding(src []byte) []byte {
 }
 
 func EncryptAES(plaintext []byte, secretKeyParam string, ivParam string) (string, error) {
-	elapsedTime := timer("AES-Encrypt")
-	defer elapsedTime()
-	time.Sleep(1 * time.Second)
-
 	// Retrieve the key and iv
 	key := []byte(secretKeyParam)
 	iv := []byte(ivParam)
@@ -56,10 +51,6 @@ func EncryptAES(plaintext []byte, secretKeyParam string, ivParam string) (string
 }
 
 func DecryptAES(ciphertext string, secretKeyParam string, ivParam string) (string, error) {
-	elapsedTime := timer("AES-Decrypt")
-	defer elapsedTime()
-	time.Sleep(1 * time.Second)
-
 	// Retrieve the key and iv
 	key := []byte(secretKeyParam)
 	iv := []byte(ivParam)
@@ -85,10 +76,6 @@ func DecryptAES(ciphertext string, secretKeyParam string, ivParam string) (strin
 }
 
 func EncryptAESFile(plainfile []byte, secretKeyParam string, ivParam string) ([]byte, error) {
-	elapsedTime := timer("AES-Encrypt")
-	defer elapsedTime()
-	time.Sleep(1 * time.Second)
-
 	// Retrieve the key and iv
 	key := []byte(secretKeyParam)
 	iv := []byte(ivParam)
@@ -111,10 +98,6 @@ func EncryptAESFile(plainfile []byte, secretKeyParam string, ivParam string) ([]
 }
 
 func DecryptAESFile(cipherfile []byte, secretKeyParam string, ivParam string) ([]byte, error) {
-	elapsedTime := timer("AES-Decrypt")
-	defer elapsedTime()
-	time.Sleep(1 * time.Second)
-
 	// Retrieve the key and iv
 	key := []byte(secretKeyParam)
 	iv := []byte(ivParam)

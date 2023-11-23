@@ -4,14 +4,9 @@ import (
 	"crypto/cipher"
 	"crypto/des"
 	"encoding/base64"
-	"time"
 )
 
 func EncryptDES(plaintext []byte, secretKeyParam string, ivParam string) (string, error) {
-	elapsedTime := timer("DES-Encrypt")
-	defer elapsedTime()
-	time.Sleep(1 * time.Second)
-
 	key := []byte(secretKeyParam)
 	iv := []byte(ivParam)
 
@@ -33,10 +28,6 @@ func EncryptDES(plaintext []byte, secretKeyParam string, ivParam string) (string
 }
 
 func DecryptDES(ciphertext string, secretKeyParam string, ivParam string) (string, error) {
-	elapsedTime := timer("DES-Decrypt")
-	defer elapsedTime()
-	time.Sleep(1 * time.Second)
-
 	key := []byte(secretKeyParam)
 	iv := []byte(ivParam)
 

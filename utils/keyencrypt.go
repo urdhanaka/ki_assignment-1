@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/base64"
+	"errors"
 	"ki_assignment-1/dto"
 )
 
@@ -14,23 +16,20 @@ func EncryptSymmetricKey(request dto.RequestedUserSymmetricKeysDTO, publicKeyStr
 
 	secretKeyBytes := []byte(request.SecretKey)
 	ivKeyBytes := []byte(request.IV)
-	oaepLabel := []byte("")
-	oaepDigest := sha256.New()
-	random := rand.Reader
 
-	encryptedSecretKey, err := rsa.EncryptOAEP(oaepDigest, random, publicKeyString, secretKeyBytes, oaepLabel)
+	encryptedSecretKey, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, publicKeyString, secretKeyBytes, nil)
 	if err != nil {
 		return dto.EncryptedRequestedUserSymmetricKeysDTO{}, err
 	}
 
-	encryptedIvKey, err := rsa.EncryptOAEP(oaepDigest, random, publicKeyString, ivKeyBytes, oaepLabel)
+	encryptedIvKey, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, publicKeyString, ivKeyBytes, nil)
 	if err != nil {
 		return dto.EncryptedRequestedUserSymmetricKeysDTO{}, err
 	}
 
 	// Convert the encrypted data to a string, for example, using base64 encoding
-	encryptedRequestedUserSymmetricKeysDto.EncryptedSecretKey = base64.StdEncoding.EncodeToString(encryptedSecretKey)
-	encryptedRequestedUserSymmetricKeysDto.EncryptedIVKey = base64.StdEncoding.EncodeToString(encryptedIvKey)
+	encryptedRequestedUserSymmetricKeysDto.EncryptedSecretKey = base64.RawStdEncoding.EncodeToString(encryptedSecretKey)
+	encryptedRequestedUserSymmetricKeysDto.EncryptedIVKey = base64.RawStdEncoding.EncodeToString(encryptedIvKey)
 
 	return encryptedRequestedUserSymmetricKeysDto, nil
 }
@@ -39,27 +38,24 @@ func EncryptSymmetricKey(request dto.RequestedUserSymmetricKeysDTO, publicKeyStr
 func DecryptSymmetricKey(request dto.EncryptedRequestedUserSymmetricKeysDTO, privateKeyString *rsa.PrivateKey) (dto.DecryptedRequestedUserSymmetricKeysDTO, error) {
 	var decryptedRequestedUserSymmetricKeysDto dto.DecryptedRequestedUserSymmetricKeysDTO
 
-	encryptedSecretKey, err := base64.StdEncoding.DecodeString(request.EncryptedSecretKey)
+	encryptedSecretKey, err := base64.RawStdEncoding.DecodeString(request.EncryptedSecretKey)
 	if err != nil {
 		return dto.DecryptedRequestedUserSymmetricKeysDTO{}, err
 	}
 
-	encryptedIvKey, err := base64.StdEncoding.DecodeString(request.EncryptedIVKey)
+	encryptedIvKey, err := base64.RawStdEncoding.DecodeString(request.EncryptedIVKey)
 	if err != nil {
 		return dto.DecryptedRequestedUserSymmetricKeysDTO{}, err
 	}
 
-	oaepLabel := []byte("")
-	oaepDigest := sha256.New()
-
-	decryptedSecretKey, err := rsa.DecryptOAEP(oaepDigest, rand.Reader, privateKeyString, encryptedSecretKey, oaepLabel)
+	decryptedSecretKey, err := privateKeyString.Decrypt(nil, encryptedSecretKey, &rsa.OAEPOptions{Hash: crypto.SHA256})
 	if err != nil {
-		return dto.DecryptedRequestedUserSymmetricKeysDTO{}, err
+		return dto.DecryptedRequestedUserSymmetricKeysDTO{}, errors.New("1")
 	}
 
-	decryptedIvKey, err := rsa.DecryptOAEP(oaepDigest, rand.Reader, privateKeyString, encryptedIvKey, oaepLabel)
+	decryptedIvKey, err := privateKeyString.Decrypt(nil, encryptedIvKey, &rsa.OAEPOptions{Hash: crypto.SHA256})
 	if err != nil {
-		return dto.DecryptedRequestedUserSymmetricKeysDTO{}, err
+		return dto.DecryptedRequestedUserSymmetricKeysDTO{}, errors.New("2")
 	}
 
 	// Convert the decrypted data to a string.

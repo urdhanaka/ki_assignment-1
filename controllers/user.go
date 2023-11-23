@@ -263,7 +263,8 @@ func (u *userController) GetUserSymmetricKeyByUsername(c *gin.Context) {
 }
 
 func (u *userController) GetUserPrivateData(c *gin.Context) {
-	var encryptedRequestDto dto.EncryptedRequestedUserSymmetricKeysDTO
+	var encryptedRequestDto dto.UserRequestDataDTO
+	var encryptedSymmetricKeysDto dto.EncryptedRequestedUserSymmetricKeysDTO
 	token := c.MustGet("token").(string)
 
 	userIDRequesting, err := u.jwtService.FindUserIDByToken(token)
@@ -279,17 +280,23 @@ func (u *userController) GetUserPrivateData(c *gin.Context) {
 		return
 	}
 
+	err = c.ShouldBindJSON(&encryptedRequestDto)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Decrypt symmetric key with private key
-	encryptedRequestDto.EncryptedSecretKey = c.Query("encrypted_secret_key")
-	encryptedRequestDto.EncryptedIVKey = c.Query("encrypted_iv_key")
-	decryptedSymmetricKey, err := u.UserService.DecryptSecretKey(encryptedRequestDto, privateKey)
+	encryptedSymmetricKeysDto.EncryptedSecretKey = encryptedRequestDto.EncyptedSecretKey
+	encryptedSymmetricKeysDto.EncryptedIVKey = encryptedRequestDto.EncryptedIvKey
+	decryptedSymmetricKey, err := u.UserService.DecryptSecretKey(encryptedSymmetricKeysDto, privateKey)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Get user's private data
-	requestedUsername := c.Query("requested_username")
+	requestedUsername := encryptedRequestDto.Username
 	requestedUserEntity, err := u.UserService.GetUserByUsername(c, requestedUsername)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
