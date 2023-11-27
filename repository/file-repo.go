@@ -18,6 +18,7 @@ type FileRepository interface {
 	GetFileByUserID(ctx context.Context, userID string) ([]entity.Files, error)
 	GetFileID(ctx context.Context, filename string) (string, error)
 	GetUserIDfromFilename(ctx context.Context, filename string) (string, error)
+	GetFileByName(ctx context.Context, fileID string) (entity.Files, error)
 }
 
 func NewFileRepository(db *gorm.DB) FileRepository {
@@ -71,7 +72,7 @@ func (db *FileConnection) GetFileByUserID(ctx context.Context, userID string) ([
 // Get File ID from Filename
 func (db *FileConnection) GetFileID(ctx context.Context, filename string) (string, error) {
 	var file entity.Files
-	if err := db.connection.Where("Files_AES = ?", filename).Select("id").First(&file).Error; err != nil {
+	if err := db.connection.Where("name = ?", filename).Select("id").First(&file).Error; err != nil {
 		return "", err
 	}
 	return file.ID.String(), nil
@@ -80,8 +81,18 @@ func (db *FileConnection) GetFileID(ctx context.Context, filename string) (strin
 // Get User ID from Filename
 func (db *FileConnection) GetUserIDfromFilename(ctx context.Context, filename string) (string, error) {
 	var file entity.Files
-	if err := db.connection.Where("Files_AES = ?", filename).Select("user_id").First(&file).Error; err != nil {
+	if err := db.connection.Where("name = ?", filename).Select("user_id").First(&file).Error; err != nil {
 		return "", err
 	}
 	return file.UserID.String(), nil
+}
+
+func (db *FileConnection) GetFileByName(ctx context.Context, filename string) (entity.Files, error) {
+	var file entity.Files
+
+	if err := db.connection.Where("name = ?", filename).First(&file).Error; err != nil {
+		return entity.Files{}, err
+	}
+
+	return file, nil
 }

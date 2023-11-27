@@ -35,20 +35,10 @@ func NewFileService(fileRepo repository.FileRepository, userRepo repository.User
 func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error) {
 	var file entity.Files
 
-	user, err := f.UserRepository.GetUserByID(ctx, fileDTO.UserID)
-	if err != nil {
-		return entity.Files{}, err
-	}
-
-	Files_AES, err := utils.EncryptAES([]byte(fileDTO.Files.Filename), user.SecretKey, user.IV)
-	if err != nil {
-		return entity.Files{}, err
-	}
-	Files_RC4, err := utils.EncryptAES([]byte(fileDTO.Files.Filename), user.SecretKey, user.IV)
-	if err != nil {
-		return entity.Files{}, err
-	}
-	Files_DES, err := utils.EncryptAES([]byte(fileDTO.Files.Filename), user.SecretKey, user.IV)
+	// Generate and Encrypt the file
+	file.SecretKey = utils.GenerateSecretKey()
+	file.IV = utils.GenerateIV()
+	Files_AES, err := utils.EncryptAES([]byte(fileDTO.Files.Filename), file.SecretKey, file.IV)
 	if err != nil {
 		return entity.Files{}, err
 	}
@@ -56,8 +46,6 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 	file.ID = uuid.New()
 	file.Name = fileDTO.Name
 	file.Files_AES = Files_AES
-	file.Files_RC4 = Files_RC4
-	file.Files_DEC = Files_DES
 	file.UserID, _ = uuid.Parse(fileDTO.UserID)
 
 	// Check file type
@@ -77,7 +65,7 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 
 	// Save the files to the uploads folder
 	fileName := fmt.Sprintf("%s/files/%s", file.UserID, file.ID)
-	if err := utils.UploadFileUtility(fileDTO.Files, fileName, user.SecretKey, user.IV); err != nil {
+	if err := utils.UploadFileUtility(fileDTO.Files, fileName, file.SecretKey, file.IV); err != nil {
 		return entity.Files{}, err
 	}
 
@@ -104,16 +92,6 @@ func (f *fileService) GetFilePath(ctx context.Context, filename string) (string,
 		return filename, err
 	}
 
-	user, err := f.UserRepository.GetUserByID(ctx, userID)
-	if err != nil {
-		return "", err
-	}
-
-	encryptedFilenameAES, err := utils.EncryptAES([]byte(filename), user.SecretKey, user.IV)
-	if err == nil {
-		filename = string(encryptedFilenameAES)
-	}
-
 	fileID, err := f.FileRepository.GetFileID(ctx, filename)
 	if err != nil {
 		return filename, err
@@ -124,19 +102,20 @@ func (f *fileService) GetFilePath(ctx context.Context, filename string) (string,
 	return result, nil
 }
 
-// Get File from repository
-func (f *fileService) GetFile(ctx context.Context, filePath string, username string) (string, error) {
-	user, err := f.UserRepository.GetUserByUsername(username)
-	if err != nil {
-		return "", err
-	}
+func (f *fileService) GetFile(ctx context.Context, filePath string, filename string) (string, error) {
+	// Get the file by filename
+    file, err := f.FileRepository.GetFileByName(ctx, filename)
+    if err != nil {
+        return "", err
+    }
 
-	res, err := utils.GetFileUtility(filePath, []byte(user.SecretKey), []byte(user.IV))
-	if err != nil {
-		return "", err
-	}
+    // Use file's SecretKey and IV for decryption
+    res, err := utils.GetFileUtility(filePath, []byte(file.SecretKey), []byte(file.IV))
+    if err != nil {
+        return "", err
+    }
 
-	return res, nil
+    return res, nil
 }
 
 // Get File by User id

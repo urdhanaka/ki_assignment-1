@@ -45,7 +45,6 @@ func (f *fileController) UploadFile(c *gin.Context) {
 
 func (f *fileController) GetFile(c *gin.Context) {
 	fileName := c.Query("filename")
-	username := c.Query("username")
 
 	filePath, err := f.FileService.GetFilePath(c, fileName)
 	if err != nil {
@@ -53,14 +52,14 @@ func (f *fileController) GetFile(c *gin.Context) {
 		return
 	}
 
-	DecryptedFilePath, err := f.FileService.GetFile(c, filePath, username)
+	DecryptedFileContent, err := f.FileService.GetFile(c, filePath, fileName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	fmt.Println(DecryptedFilePath)
-	_, err = os.Stat(DecryptedFilePath)
+	fmt.Println(DecryptedFileContent)
+	_, err = os.Stat(DecryptedFileContent)
 	if os.IsNotExist(err) {
 		res := gin.H{
 			"status":  "error",
@@ -69,9 +68,9 @@ func (f *fileController) GetFile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-	c.File(DecryptedFilePath)
+	c.File(DecryptedFileContent)
 
-	err = os.Remove(DecryptedFilePath)
+	err = os.Remove(DecryptedFileContent)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
