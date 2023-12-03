@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"ki_assignment-1/dto"
 	"ki_assignment-1/entity"
 	"ki_assignment-1/repository"
@@ -34,6 +35,29 @@ func NewFileService(fileRepo repository.FileRepository, userRepo repository.User
 
 func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error) {
 	var file entity.Files
+	// Find private key by user id
+	privateKey, err := utils.GetPrivateKey(fileDTO.UserID)
+	if err != nil {
+		return entity.Files{}, err
+	}
+
+	// Read the file first
+	uploadedFile, err := fileDTO.Files.Open()
+	if err != nil {
+		return entity.Files{}, err
+	}
+	defer uploadedFile.Close()
+
+	fileData, err := io.ReadAll(uploadedFile)
+	if err != nil {
+		return entity.Files{}, err
+	}
+
+	// Generate Digital Signature
+	signature, err := utils.GenerateSignature(fileData, privateKey)
+	if err != nil {
+		return entity.Files{}, err
+	}
 
 	// Generate and Encrypt the file
 	file.SecretKey = utils.GenerateSecretKey()
@@ -46,6 +70,7 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 	file.ID = uuid.New()
 	file.Name = fileDTO.Name
 	file.Files_AES = Files_AES
+	file.Signature = signature
 	file.UserID = fileDTO.UserID
 
 	// Check file type
