@@ -31,12 +31,11 @@ func main() {
 		fileService service.FileService = service.NewFileService(fileRepository, userRepository)
 
 		userController controllers.UserController = controllers.NewUserController(userService, jwtService)
-		fileController controllers.FileController = controllers.NewFileController(fileService)
+		fileController controllers.FileController = controllers.NewFileController(fileService, jwtService)
 	)
 
 	router := gin.Default()
 	router.Use(middleware.CORSMiddleware())
-
 
 	routes.UserRoutes(router, userController, jwtService)
 	routes.FileRoutes(router, fileController, jwtService)

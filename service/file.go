@@ -46,7 +46,7 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 	file.ID = uuid.New()
 	file.Name = fileDTO.Name
 	file.Files_AES = Files_AES
-	file.UserID, _ = uuid.Parse(fileDTO.UserID)
+	file.UserID = fileDTO.UserID
 
 	// Check file type
 	if fileDTO.Files.Header.Get("Content-Type") != "application/pdf" && fileDTO.Files.Header.Get("Content-Type") != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" && fileDTO.Files.Header.Get("Content-Type") != "application/vnd.openxmlformats-officedocument.wordprocessingml.document" && fileDTO.Files.Header.Get("Content-Type") != "image/jpeg" && fileDTO.Files.Header.Get("Content-Type") != "image/png" && fileDTO.Files.Header.Get("Content-Type") != "video/mp4" {
@@ -104,18 +104,18 @@ func (f *fileService) GetFilePath(ctx context.Context, filename string) (string,
 
 func (f *fileService) GetFile(ctx context.Context, filePath string, filename string) (string, error) {
 	// Get the file by filename
-    file, err := f.FileRepository.GetFileByName(ctx, filename)
-    if err != nil {
-        return "", err
-    }
+	file, err := f.FileRepository.GetFileByName(ctx, filename)
+	if err != nil {
+		return "", err
+	}
 
-    // Use file's SecretKey and IV for decryption
-    res, err := utils.GetFileUtility(filePath, []byte(file.SecretKey), []byte(file.IV))
-    if err != nil {
-        return "", err
-    }
+	// Use file's SecretKey and IV for decryption
+	res, err := utils.GetFileUtility(filePath, []byte(file.SecretKey), []byte(file.IV))
+	if err != nil {
+		return "", err
+	}
 
-    return res, nil
+	return res, nil
 }
 
 // Get File by User id

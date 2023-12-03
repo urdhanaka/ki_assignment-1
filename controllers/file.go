@@ -17,11 +17,13 @@ type FileController interface {
 }
 
 type fileController struct {
+	jwtService  service.JWTService
 	FileService service.FileService
 }
 
-func NewFileController(fileService service.FileService) FileController {
+func NewFileController(fileService service.FileService, jwts service.JWTService) FileController {
 	return &fileController{
+		jwtService:  jwts,
 		FileService: fileService,
 	}
 }
@@ -29,11 +31,19 @@ func NewFileController(fileService service.FileService) FileController {
 func (f *fileController) UploadFile(c *gin.Context) {
 	var fileDTO dto.FileCreateDto
 
+	token := c.MustGet("token").(string)
+	userID, err := f.jwtService.FindUserIDByToken(token)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	if err := c.ShouldBind(&fileDTO); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error1": err.Error()})
 		return
 	}
 
+	fileDTO.UserID = userID
 	file, err := f.FileService.UploadFile(c, fileDTO)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error2": err.Error()})
