@@ -4,7 +4,10 @@ import (
 	"crypto"
 	"crypto/rsa"
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/base64"
+	"encoding/pem"
+	"errors"
 	"fmt"
 )
 
@@ -33,4 +36,23 @@ func VerifySignature(msg []byte, signature string, publicKey *rsa.PublicKey) boo
 	}
 
 	return true
+}
+
+func ParsePublicKeyFromPEM(publicKeyPEM string) (*rsa.PublicKey, error) {
+	block, _ := pem.Decode([]byte(publicKeyPEM))
+	if block == nil {
+			return nil, errors.New("failed to parse PEM block containing the public key")
+	}
+
+	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+			return nil, err
+	}
+
+	switch pub := pub.(type) {
+	case *rsa.PublicKey:
+			return pub, nil
+	default:
+			return nil, errors.New("public key is not of type RSA")
+	}
 }

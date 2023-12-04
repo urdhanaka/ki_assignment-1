@@ -19,6 +19,7 @@ type FileService interface {
 	GetFilePath(ctx context.Context, filename string, userID string) (string, error)
 	GetFile(ctx context.Context, filePath string, username string) (string, error)
 	GetFileByUserID(ctx context.Context, userID string) ([]entity.Files, error)
+	GetFileSignature(ctx context.Context, userID string) (string, error)
 }
 
 type fileService struct {
@@ -156,4 +157,14 @@ func (f *fileService) GetFileByUserID(ctx context.Context, userID string) ([]ent
 	}
 
 	return result, nil
+}
+
+func (f *fileService) GetFileSignature(ctx context.Context, userID string) (string, error) {
+	// Get the file by filename
+	file, err := f.FileRepository.GetFileByUserID(ctx, userID)
+	if err != nil {
+		return "", err
+	}
+
+	return file[0].Signature, nil
 }

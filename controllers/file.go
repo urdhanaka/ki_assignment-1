@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"ki_assignment-1/dto"
 	"ki_assignment-1/service"
+	"ki_assignment-1/utils"
 	"net/http"
 	"os"
 
@@ -64,6 +65,8 @@ func (f *fileController) GetFile(c *gin.Context) {
 	}
 
 	fileName := c.Query("filename")
+	publicKey := c.Query("public_key")
+	rsaPublicKey, err := utils.ParsePublicKeyFromPEM(publicKey)
 
 	filePath, err := f.FileService.GetFilePath(c, fileName, userID.String())
 	if err != nil {
@@ -77,8 +80,6 @@ func (f *fileController) GetFile(c *gin.Context) {
 		return
 	}
 
-	// Verify the signature of the file
-
 	fmt.Println(DecryptedFileContent)
 	_, err = os.Stat(DecryptedFileContent)
 	if os.IsNotExist(err) {
@@ -89,7 +90,21 @@ func (f *fileController) GetFile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-	c.File(DecryptedFileContent)
+
+	signature, err := f.FileService.GetFileSignature(c, userID.String())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Verify the signature of the file
+	isVerified := utils.VerifySignature([]byte(DecryptedFileContent), signature, rsaPublicKey)
+
+	// c.File(DecryptedFileContent)
+	c.JSON(http.StatusOK, gin.H{
+		"file": DecryptedFileContent,
+		"is_signature_verified": isVerified,
+	})
 
 	err = os.Remove(DecryptedFileContent)
 	if err != nil {
