@@ -18,13 +18,15 @@ type FileController interface {
 
 type fileController struct {
 	jwtService  service.JWTService
+	UserService service.UserService
 	FileService service.FileService
 }
 
-func NewFileController(fileService service.FileService, jwts service.JWTService) FileController {
+func NewFileController(fileService service.FileService, jwts service.JWTService, userService service.UserService) FileController {
 	return &fileController{
 		jwtService:  jwts,
 		FileService: fileService,
+		UserService: userService,
 	}
 }
 
@@ -54,9 +56,16 @@ func (f *fileController) UploadFile(c *gin.Context) {
 }
 
 func (f *fileController) GetFile(c *gin.Context) {
+	token := c.MustGet("token").(string)
+	userID, err := f.jwtService.FindUserIDByToken(token)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	fileName := c.Query("filename")
 
-	filePath, err := f.FileService.GetFilePath(c, fileName)
+	filePath, err := f.FileService.GetFilePath(c, fileName, userID.String())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -67,6 +76,8 @@ func (f *fileController) GetFile(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// Verify the signature of the file
 
 	fmt.Println(DecryptedFileContent)
 	_, err = os.Stat(DecryptedFileContent)

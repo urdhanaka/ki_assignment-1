@@ -31,7 +31,7 @@ func main() {
 		fileService service.FileService = service.NewFileService(fileRepository, userRepository)
 
 		userController controllers.UserController = controllers.NewUserController(userService, jwtService)
-		fileController controllers.FileController = controllers.NewFileController(fileService, jwtService)
+		fileController controllers.FileController = controllers.NewFileController(fileService, jwtService, userService)
 	)
 
 	router := gin.Default()

@@ -12,8 +12,8 @@ func FileRoutes(router *gin.Engine, FileController controllers.FileController, j
 	file := router.Group("/file")
 	{
 		file.POST("/upload", middleware.Authenticate(jwtService), FileController.UploadFile)
-		file.GET("/detail", FileController.GetFile)
+		file.GET("/detail", middleware.Authenticate(jwtService), FileController.GetFile)
 		// Get file by user id with param user id
-		file.GET("/user", FileController.GetFileByUserID)
+		file.GET("/user", middleware.Authenticate(jwtService), FileController.GetFileByUserID)
 	}
 }

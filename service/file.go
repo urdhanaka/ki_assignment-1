@@ -16,7 +16,7 @@ import (
 type FileService interface {
 	UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error)
 	GetAllFiles(ctx context.Context) ([]entity.Files, error)
-	GetFilePath(ctx context.Context, filename string) (string, error)
+	GetFilePath(ctx context.Context, filename string, userID string) (string, error)
 	GetFile(ctx context.Context, filePath string, username string) (string, error)
 	GetFileByUserID(ctx context.Context, userID string) ([]entity.Files, error)
 }
@@ -111,10 +111,15 @@ func (f *fileService) GetAllFiles(ctx context.Context) ([]entity.Files, error) {
 	return result, nil
 }
 
-func (f *fileService) GetFilePath(ctx context.Context, filename string) (string, error) {
-	userID, err := f.FileRepository.GetUserIDfromFilename(ctx, filename)
+func (f *fileService) GetFilePath(ctx context.Context, filename string, userID string) (string, error) {
+	userIDFromFilename, err := f.FileRepository.GetUserIDfromFilename(ctx, filename)
 	if err != nil {
 		return filename, err
+	}
+
+	// Check if the user is the owner of the file
+	if userIDFromFilename != userID {
+		return filename, errors.New("you are not the owner of the file")
 	}
 
 	fileID, err := f.FileRepository.GetFileID(ctx, filename)
