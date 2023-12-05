@@ -168,3 +168,4 @@ func (f *fileService) GetFileSignature(ctx context.Context, userID string) (stri
 
 	return file[0].Signature, nil
 }
+

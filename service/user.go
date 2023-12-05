@@ -118,6 +118,11 @@ func (u *userService) RegisterUser(ctx context.Context, userDTO dto.UserCreateDt
 		return entity.User{}, nil
 	}
 
+	err = utils.GenerateCertificates(user.ID)
+	if err != nil {
+		return entity.User{}, nil
+	}
+
 	result, err := u.UserRepository.RegisterUser(ctx, user)
 	if err != nil {
 		return entity.User{}, err

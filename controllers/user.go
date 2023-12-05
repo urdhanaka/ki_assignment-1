@@ -124,7 +124,7 @@ func (u *userController) UpdateCredentialUser(c *gin.Context) {
 	}
 
 	// Get user by ID
-	user, err := u.UserService.GetUserByID(c, userID.String())
+	_, err = u.UserService.GetUserByID(c, userID.String())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -137,7 +137,7 @@ func (u *userController) UpdateCredentialUser(c *gin.Context) {
 		return
 	}
 
-	user, err = u.UserService.CredentialUpdateUser(c, userDTO)
+	user, err := u.UserService.CredentialUpdateUser(c, userDTO)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -112,7 +112,7 @@ func (f *fileController) GetFile(c *gin.Context) {
 
 	// c.File(DecryptedFileContent)
 	c.JSON(http.StatusOK, gin.H{
-		"file": DecryptedFileContent,
+		"file":                  DecryptedFileContent,
 		"is_signature_verified": isVerified,
 	})
 

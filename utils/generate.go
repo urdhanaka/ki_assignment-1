@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"math/big"
 	"math/rand"
 	"os"
 	"time"
@@ -96,6 +97,53 @@ func GenerateAsymmetricKeys(id uuid.UUID) error {
 		Bytes: publicKeyBytes,
 	})
 	err = os.WriteFile(publicKeyFilename, publicKeyPEM, 0o644)
+	if err != nil {
+		return nil
+	}
+
+	return nil
+}
+
+func GenerateCertificates(id uuid.UUID) error {
+	privateKey, err := GetPrivateKey(id)
+	if err != nil {
+		return err
+	}
+
+	publicKey, err := GetRSAPublicKey(id)
+	if err != nil {
+		return err
+	}
+
+	certificateFolder := "keys/certificate"
+	if _, err = os.Stat(certificateFolder); os.IsNotExist(err) {
+		if err = os.MkdirAll(certificateFolder, 0o777); err != nil {
+			return err
+		}
+	}
+
+	x509RootCertificate := &x509.Certificate{
+		SerialNumber:          big.NewInt(2023),
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().AddDate(5, 0, 0),
+		IsCA:                  true,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		BasicConstraintsValid: true,
+	}
+
+	rootCertificateBytes, err := x509.CreateCertificate(cryptrand.Reader, x509RootCertificate, x509RootCertificate, publicKey, privateKey)
+	if err != nil {
+		return err
+	}
+
+	certificatePath := fmt.Sprintf("keys/certificate/%s.pem", id)
+	certificatePEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: rootCertificateBytes,
+	})
+
+	err = os.WriteFile(certificatePath, certificatePEM, 0o644)
 	if err != nil {
 		return nil
 	}
