@@ -12,3 +12,8 @@ type FileCreateDto struct {
 	Name   string                `form:"name" binding:"required"`
 	UserID uuid.UUID             `gorm:"foreignKey" json:"user_id" form:"user_id"`
 }
+
+type GetFileDto struct {
+	Filename  string `form:"filename" binding:"required"`
+	PublicKey string `form:"public_key" binding:"required"`
+}

@@ -64,17 +64,27 @@ func (f *fileController) GetFile(c *gin.Context) {
 		return
 	}
 
-	fileName := c.Query("filename")
-	publicKey := c.Query("public_key")
-	rsaPublicKey, err := utils.ParsePublicKeyFromPEM(publicKey)
+	var fileDTO dto.GetFileDto
+	if err := c.ShouldBind(&fileDTO); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	filePath, err := f.FileService.GetFilePath(c, fileName, userID.String())
+	fmt.Println("dto.Publickey:  " + fileDTO.PublicKey)
+
+	rsaPublicKey, err := utils.ParsePublicKeyFromString(fileDTO.PublicKey)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	DecryptedFileContent, err := f.FileService.GetFile(c, filePath, fileName)
+	filePath, err := f.FileService.GetFilePath(c, fileDTO.Filename, userID.String())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	DecryptedFileContent, err := f.FileService.GetFile(c, filePath, fileDTO.Filename)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

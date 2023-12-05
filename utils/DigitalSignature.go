@@ -6,9 +6,8 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
-	"encoding/pem"
-	"errors"
 	"fmt"
+	"strings"
 )
 
 func GenerateSignature(msg []byte, privateKey *rsa.PrivateKey) (string, error) {
@@ -21,9 +20,15 @@ func GenerateSignature(msg []byte, privateKey *rsa.PrivateKey) (string, error) {
 	return base64.StdEncoding.EncodeToString([]byte(signature)), err
 }
 
-func VerifySignature(msg []byte, signature string, publicKey *rsa.PublicKey) bool {
+func VerifySignature(msg []byte, signature string, publickey []byte) bool {
 	msgHash := sha256.Sum256(msg)
 	signatureBytes, err := base64.StdEncoding.DecodeString(signature)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	publicKey, err := x509.ParsePKCS1PublicKey(publickey)
 	if err != nil {
 		fmt.Println(err)
 		return false
@@ -38,21 +43,21 @@ func VerifySignature(msg []byte, signature string, publicKey *rsa.PublicKey) boo
 	return true
 }
 
-func ParsePublicKeyFromPEM(publicKeyPEM string) (*rsa.PublicKey, error) {
-	block, _ := pem.Decode([]byte(publicKeyPEM))
-	if block == nil {
-			return nil, errors.New("failed to parse PEM block containing the public key")
+func ParsePublicKeyFromString(publicKey string) ([]byte, error) {
+	publicKey = strings.ReplaceAll(publicKey, " ", "+")
+
+	padding := len(publicKey) % 4
+	if padding > 0 {
+		publicKey += strings.Repeat("=", 4-padding)
 	}
 
-	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+	publicKeyBytes, err := base64.StdEncoding.DecodeString(publicKey)
 	if err != nil {
-			return nil, err
+		fmt.Printf("Error decoding base64: %v\n", err)
+		fmt.Println("Base64 String:", publicKey)
+		return nil, err
 	}
 
-	switch pub := pub.(type) {
-	case *rsa.PublicKey:
-			return pub, nil
-	default:
-			return nil, errors.New("public key is not of type RSA")
-	}
+	return publicKeyBytes, nil
+
 }
