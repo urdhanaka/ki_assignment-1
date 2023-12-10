@@ -58,6 +58,11 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 		return entity.Files{}, err
 	}
 
+	publicKey, err := utils.GetRSAPublicKey(fileDTO.UserID)
+	if err != nil {
+		return entity.Files{}, err
+	}
+
 	// Read the file first
 	uploadedFile, err := fileDTO.Files.Open()
 	if err != nil {
@@ -73,7 +78,7 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 	// Generate Digital Signature
 	var signature string
 	if fileDTO.Files.Header.Get("Content-Type") == "application/pdf" {
-		signature, err = utils.GenerateSignature(fileData, privateKey)
+		signature, err = utils.GenerateEncryptedHash(fileData, publicKey)
 		if err != nil {
 			return entity.Files{}, err
 		}
