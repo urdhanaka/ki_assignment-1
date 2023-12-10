@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
-	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"strings"
@@ -22,6 +21,7 @@ func GenerateEncryptedHash(msg []byte, publicKey *rsa.PublicKey) (string, error)
 	return base64.StdEncoding.EncodeToString(encryptedMsgHash), nil
 }
 
+// unused
 func GenerateSignature(msg []byte, privateKey *rsa.PrivateKey) (string, error) {
 	msgHash := sha256.Sum256(msg)
 	signature, err := rsa.SignPKCS1v15(nil, privateKey, crypto.SHA256, msgHash[:])
@@ -32,27 +32,18 @@ func GenerateSignature(msg []byte, privateKey *rsa.PrivateKey) (string, error) {
 	return base64.StdEncoding.EncodeToString([]byte(signature)), err
 }
 
-func VerifySignature(msg []byte, signature string, publickey []byte) bool {
+func VerifySignature(msg []byte, signature string, publicKey *rsa.PublicKey) bool {
 	msgHash := sha256.Sum256(msg)
-	signatureBytes, err := base64.StdEncoding.DecodeString(signature)
+
+	encryptedMsgHash, err := rsa.EncryptOAEP(sha256.New(), rand.Reader, publicKey, msgHash[:], nil)
 	if err != nil {
 		fmt.Println(err)
 		return false
 	}
 
-	publicKey, err := x509.ParsePKCS1PublicKey(publickey)
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
+	encryptedMsgHashString := base64.StdEncoding.EncodeToString(encryptedMsgHash)
 
-	err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, msgHash[:], signatureBytes)
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-
-	return true
+	return encryptedMsgHashString == string(signature)
 }
 
 func ParsePublicKeyFromString(publicKey string) ([]byte, error) {

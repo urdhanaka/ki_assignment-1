@@ -72,11 +72,17 @@ func (f *fileController) GetFile(c *gin.Context) {
 
 	fmt.Println("dto.Publickey:  " + fileDTO.PublicKey)
 
-	rsaPublicKey, err := utils.ParsePublicKeyFromString(fileDTO.PublicKey)
+	publicKey, err := f.FileService.GetUserPublicKeyForFile(c, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	// rsaPublicKey, err := utils.ParsePublicKeyFromString(fileDTO.PublicKey)
+	// if err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	// 	return
+	// }
 
 	filePath, err := f.FileService.GetFilePath(c, fileDTO.Filename, userID.String())
 	if err != nil {
@@ -108,7 +114,7 @@ func (f *fileController) GetFile(c *gin.Context) {
 	}
 
 	// Verify the signature of the file
-	isVerified := utils.VerifySignature([]byte(DecryptedFileContent), signature, rsaPublicKey)
+	isVerified := utils.VerifySignature([]byte(DecryptedFileContent), signature, publicKey)
 
 	// c.File(DecryptedFileContent)
 	c.JSON(http.StatusOK, gin.H{

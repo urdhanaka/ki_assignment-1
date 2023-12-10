@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"crypto/rsa"
 	"errors"
 	"fmt"
 	"io"
@@ -20,6 +21,7 @@ type FileService interface {
 	GetFile(ctx context.Context, filePath string, username string) (string, error)
 	GetFileByUserID(ctx context.Context, userID string) ([]entity.Files, error)
 	GetFileSignature(ctx context.Context, userID string) (string, error)
+	GetUserPublicKeyForFile(ctx context.Context, userID uuid.UUID) (*rsa.PublicKey, error)
 }
 
 type fileService struct {
@@ -50,12 +52,6 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 	// Check file name
 	if fileDTO.Files.Filename == "" {
 		return entity.Files{}, errors.New("file name is not valid")
-	}
-
-	// Find private key by user id
-	privateKey, err := utils.GetPrivateKey(fileDTO.UserID)
-	if err != nil {
-		return entity.Files{}, err
 	}
 
 	publicKey, err := utils.GetRSAPublicKey(fileDTO.UserID)
@@ -181,4 +177,13 @@ func (f *fileService) GetFileSignature(ctx context.Context, userID string) (stri
 	}
 
 	return file[0].Signature, nil
+}
+
+func (f *fileService) GetUserPublicKeyForFile(ctx context.Context, userID uuid.UUID) (*rsa.PublicKey, error) {
+	userPublicKey, err := utils.GetRSAPublicKey(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return userPublicKey, nil
 }
