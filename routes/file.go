@@ -15,5 +15,6 @@ func FileRoutes(router *gin.Engine, FileController controllers.FileController, j
 		file.GET("/detail", middleware.Authenticate(jwtService), FileController.GetFile)
 		// Get file by user id with param user id
 		file.GET("/user", middleware.Authenticate(jwtService), FileController.GetFileByUserID)
+		// file.GET("/embed", middleware.Authenticate(jwtService), FileController.GetFileByFileID)
 	}
 }

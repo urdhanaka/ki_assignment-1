@@ -96,4 +96,3 @@ func (db *FileConnection) GetFileByName(ctx context.Context, filename string) (e
 
 	return file, nil
 }
-

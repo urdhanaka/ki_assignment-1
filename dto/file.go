@@ -17,3 +17,9 @@ type GetFileDto struct {
 	Filename  string `form:"filename" binding:"required"`
 	PublicKey string `form:"public_key" binding:"required"`
 }
+
+type GetFileByFileID struct {
+	FileID    uuid.UUID `form:"file_id" binding:"required"`
+	UserID    uuid.UUID `form:"user_id" binding:"required"`
+	PublicKey string    `form:"public_key" binding:"required"`
+}

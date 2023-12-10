@@ -10,7 +10,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -20,18 +19,18 @@ func main() {
 	}
 
 	var (
-		db *gorm.DB = config.SetupDatabaseConnection()
+		db = config.SetupDatabaseConnection()
 
-		jwtService service.JWTService = service.NewJWTService()
+		jwtService = service.NewJWTService()
 
-		userRepository repository.UserRepository = repository.NewUserRepository(db)
-		fileRepository repository.FileRepository = repository.NewFileRepository(db)
+		userRepository = repository.NewUserRepository(db)
+		fileRepository = repository.NewFileRepository(db)
 
-		userService service.UserService = service.NewUserService(userRepository)
-		fileService service.FileService = service.NewFileService(fileRepository, userRepository)
+		userService = service.NewUserService(userRepository)
+		fileService = service.NewFileService(fileRepository, userRepository)
 
-		userController controllers.UserController = controllers.NewUserController(userService, jwtService)
-		fileController controllers.FileController = controllers.NewFileController(fileService, jwtService, userService)
+		userController = controllers.NewUserController(userService, jwtService)
+		fileController = controllers.NewFileController(fileService, jwtService, userService)
 	)
 
 	router := gin.Default()

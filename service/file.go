@@ -36,6 +36,22 @@ func NewFileService(fileRepo repository.FileRepository, userRepo repository.User
 
 func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto) (entity.Files, error) {
 	var file entity.Files
+
+	// Check file type
+	if fileDTO.Files.Header.Get("Content-Type") != "application/pdf" && fileDTO.Files.Header.Get("Content-Type") != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" && fileDTO.Files.Header.Get("Content-Type") != "application/vnd.openxmlformats-officedocument.wordprocessingml.document" && fileDTO.Files.Header.Get("Content-Type") != "image/jpeg" && fileDTO.Files.Header.Get("Content-Type") != "image/png" && fileDTO.Files.Header.Get("Content-Type") != "video/mp4" {
+		return entity.Files{}, errors.New("file type is not supported")
+	}
+
+	// Check file size
+	if fileDTO.Files.Size > 1000000 {
+		return entity.Files{}, errors.New("file size is too large")
+	}
+
+	// Check file name
+	if fileDTO.Files.Filename == "" {
+		return entity.Files{}, errors.New("file name is not valid")
+	}
+
 	// Find private key by user id
 	privateKey, err := utils.GetPrivateKey(fileDTO.UserID)
 	if err != nil {
@@ -55,9 +71,12 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 	}
 
 	// Generate Digital Signature
-	signature, err := utils.GenerateSignature(fileData, privateKey)
-	if err != nil {
-		return entity.Files{}, err
+	var signature string
+	if fileDTO.Files.Header.Get("Content-Type") == "application/pdf" {
+		signature, err = utils.GenerateSignature(fileData, privateKey)
+		if err != nil {
+			return entity.Files{}, err
+		}
 	}
 
 	// Generate and Encrypt the file
@@ -74,26 +93,16 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 	file.Signature = signature
 	file.UserID = fileDTO.UserID
 
-	// Check file type
-	if fileDTO.Files.Header.Get("Content-Type") != "application/pdf" && fileDTO.Files.Header.Get("Content-Type") != "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" && fileDTO.Files.Header.Get("Content-Type") != "application/vnd.openxmlformats-officedocument.wordprocessingml.document" && fileDTO.Files.Header.Get("Content-Type") != "image/jpeg" && fileDTO.Files.Header.Get("Content-Type") != "image/png" && fileDTO.Files.Header.Get("Content-Type") != "video/mp4" {
-		return entity.Files{}, errors.New("file type is not supported")
-	}
-
-	// Check file size
-	if fileDTO.Files.Size > 1000000 {
-		return entity.Files{}, errors.New("file size is too large")
-	}
-
-	// Check file name
-	if fileDTO.Files.Filename == "" {
-		return entity.Files{}, errors.New("file name is not valid")
-	}
-
 	// Save the files to the uploads folder
 	fileName := fmt.Sprintf("%s/files/%s", file.UserID, file.ID)
 	if err := utils.UploadFileUtility(fileDTO.Files, fileName, file.SecretKey, file.IV); err != nil {
 		return entity.Files{}, err
 	}
+
+	// err = utils.EmbedDigitalSign(file.ID, file.UserID, file.SecretKey, file.IV)
+	// if err != nil {
+	// 	return entity.Files{}, err
+	// }
 
 	result, err := f.FileRepository.UploadFile(ctx, file)
 	if err != nil {
@@ -168,4 +177,3 @@ func (f *fileService) GetFileSignature(ctx context.Context, userID string) (stri
 
 	return file[0].Signature, nil
 }
-

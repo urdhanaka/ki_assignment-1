@@ -3,8 +3,6 @@ module ki_assignment-1
 go 1.21
 
 require (
-	github.com/digitorus/pdf v0.1.2
-	github.com/digitorus/pdfsign v0.0.0-20231127191358-421a83f42e3c
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
 	golang.org/x/crypto v0.16.0
@@ -13,10 +11,7 @@ require (
 )
 
 require (
-	github.com/digitorus/pkcs7 v0.0.0-20230220124406-51331ccfc40f // indirect
-	github.com/digitorus/timestamp v0.0.0-20230220124323-d542479a2425 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
-	github.com/mattetti/filebuffer v1.0.1 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )

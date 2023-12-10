@@ -18,7 +18,7 @@ func Authenticate(jwtService service.JWTService) gin.HandlerFunc {
 			c.AbortWithStatusJSON(401, gin.H{"error": "Token Tidak Valid"})
 			return
 		}
-		authHeader = strings.Replace(authHeader, "Bearer ", "", -1)
+		authHeader = strings.ReplaceAll(authHeader, "Bearer ", "")
 		token, err := jwtService.ValidateToken(authHeader)
 		if err != nil {
 			c.AbortWithStatusJSON(401, gin.H{"error": "Token Tidak Valid"})
