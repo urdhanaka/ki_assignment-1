@@ -80,6 +80,11 @@ func (f *fileService) UploadFile(ctx context.Context, fileDTO dto.FileCreateDto)
 		}
 	}
 
+	// Append it to the end of the file
+	fileData = append(fileData, []byte("\nSignature:" + signature)...)
+	fileDataString := string(fileData)
+	fmt.Println(fileDataString)
+
 	// Generate and Encrypt the file
 	file.SecretKey = utils.GenerateSecretKey()
 	file.IV = utils.GenerateIV()

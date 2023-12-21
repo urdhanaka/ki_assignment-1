@@ -16,7 +16,6 @@ type FileCreateDto struct {
 type GetFileDto struct {
 	Filename  string `form:"filename" binding:"required"`
 	PublicKey string `form:"public_key" binding:"required"`
-	UserID 	  string `form:"user_id" binding:"required"`
 }
 
 type GetFileByFileID struct {
